@@ -1,0 +1,43 @@
+version: "3"
+
+services:
+
+    jenkins:
+        container_name: probation-jenkins
+        image: jenkins/jenkins:latest
+        ports:
+            - "8090:8080"
+            - "50000:50000"
+        volumes:
+            - "jenkins:/var/jenkins_home"
+
+    app:
+        container_name: probation-app
+        build:
+            context: ./../app/
+        ports:
+            - "8091:8080"
+        volumes:
+            - ./../app/:/var/app/
+        command: symfony server:start --port=8080
+
+    database:
+        container_name: probation-database
+        image: postgres:13-alpine
+        environment:
+            POSTGRES_DB: app
+            POSTGRES_PASSWORD: password
+            POSTGRES_USER: admin
+        volumes:
+            - db-data:/var/lib/postgresql/data:rw
+
+#    memcached:
+#        container_name: probation-memcached
+
+#    redis:
+#        container_name: probation-redis
+
+
+volumes:
+    jenkins:
+    db-data:
