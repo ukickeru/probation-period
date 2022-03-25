@@ -8,6 +8,8 @@ services:
         ports:
             - "8090:8080"
             - "50000:50000"
+        links:
+            - "app"
         volumes:
             - "jenkins:/var/jenkins_home"
 
@@ -17,9 +19,12 @@ services:
             context: ./../app/
         ports:
             - "8091:8080"
+        expose:
+            - "22"
+        links:
+            - "database"
         volumes:
             - ./../app/:/var/app/
-        command: symfony server:start --port=8080
 
     database:
         container_name: probation-database
