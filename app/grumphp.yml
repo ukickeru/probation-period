@@ -1,0 +1,11 @@
+grumphp:
+    parallel:
+        enabled: false
+    tasks:
+        composer:
+            no_check_lock: true
+        phpcsfixer:
+        phpstan:
+            level: 2
+            ignore_patterns: ['tests/']
+        phpunit:
