@@ -1,6 +1,6 @@
 <?php
 
-namespace Mygento\AccessControlBundle\Core\tests\Unit\Domain\Entity;
+namespace Mygento\AccessControlBundle\Tests\Unit\Domain\Entity;
 
 use Mygento\AccessControlBundle\Core\Domain\Entity\Group;
 use Mygento\AccessControlBundle\Core\Domain\Entity\User;

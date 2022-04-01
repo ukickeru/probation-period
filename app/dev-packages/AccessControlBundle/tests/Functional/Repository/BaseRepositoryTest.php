@@ -1,6 +1,6 @@
 <?php
 
-namespace Mygento\AccessControlBundle\Core\tests\Functional\Repository;
+namespace Mygento\AccessControlBundle\Tests\Functional\Repository;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
