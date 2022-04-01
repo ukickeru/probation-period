@@ -10,9 +10,12 @@ services:
     Mygento\AccessControlBundle\:
         resource: '../src/'
         exclude:
+            - '../src/AccessControlBundle.php'
             - '../src/DependencyInjection/'
             - '../src/Core/Domain/Entity/'
+            - '../src/Core/tests/'
             - '../src/ACL/Domain/Entity/'
+            - '../src/ACL/tests/'
 
     mygento.access_control.facade:
         class: 'Mygento\AccessControlBundle\Core\Facade'

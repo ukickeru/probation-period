@@ -10,8 +10,16 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class User
 {
+    /**
+     * @ORM\Id()
+     * @ORM\GeneratedValue()
+     * @ORM\Column(type="integer")
+     */
     private $id;
 
+    /**
+     * @ORM\ManyToMany(targetEntity=Group::class, mappedBy="users")
+     */
     private ArrayCollection $groups;
 
     public function __construct(

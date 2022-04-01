@@ -2,10 +2,24 @@
 
 namespace Mygento\AccessControlBundle\Core\Domain\Entity;
 
+use Doctrine\ORM\Mapping as ORM;
+
+/**
+ * @ORM\Entity()
+ */
 class Project
 {
+    /**
+     * @ORM\Id()
+     * @ORM\GeneratedValue()
+     * @ORM\Column(type="integer")
+     */
     private $id;
 
+    /**
+     * @ORM\OneToOne(targetEntity=Group::class)
+     * @ORM\JoinColumn(name="group_id", referencedColumnName="id")
+     */
     private Group $group;
 
     public function __construct(

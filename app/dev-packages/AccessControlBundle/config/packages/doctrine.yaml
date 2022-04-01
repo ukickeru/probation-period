@@ -2,14 +2,14 @@ doctrine:
     orm:
         mappings:
 
-            Mygento\AccessControl\Core\Entity:
-                is_bundle: false
+            AccessControlBundle\Core:
+                type: annotation
                 dir: '%mygento.access_control.config.bundle_dir%/src/Core/Domain/Entity'
-                prefix: 'Mygento\AccessControl\Core\Entity'
-                alias: Mygento\AccessControl\Core\Entity
+                prefix: 'Mygento\AccessControlBundle\Core\Domain\Entity'
+                alias: AccessControlBundle\Core
 
-            Mygento\AccessControl\ACL\Entity:
-                is_bundle: false
+            AccessControlBundle\ACL:
+                type: annotation
                 dir: '%mygento.access_control.config.bundle_dir%/src/ACL/Domain/Entity'
-                prefix: 'Mygento\AccessControl\ACL\Entity'
-                alias: Mygento\AccessControl\ACL\Entity
+                prefix: 'Mygento\AccessControlBundle\ACL\Domain\Entity'
+                alias: AccessControlBundle\ACL

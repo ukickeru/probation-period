@@ -3,13 +3,38 @@
 namespace Mygento\AccessControlBundle\Core\Domain\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\ORM\Mapping as ORM;
 
+/**
+ * @ORM\Entity()
+ */
 class Group
 {
+    /**
+     * @ORM\Id()
+     * @ORM\GeneratedValue()
+     * @ORM\Column(type="integer")
+     */
     private $id;
 
+    /**
+     * @ORM\ManyToMany(targetEntity=User::class, inversedBy="groups")
+     * @ORM\JoinTable(
+     *     name="users_groups",
+     *     joinColumns={@ORM\JoinColumn(name="user_id", referencedColumnName="id")},
+     *     inverseJoinColumns={@ORM\JoinColumn(name="group_id", referencedColumnName="id")}
+     * )
+     */
     private ArrayCollection $users;
 
+    /**
+     * @ORM\ManyToMany(targetEntity=Resource::class, inversedBy="groups")
+     * @ORM\JoinTable(
+     *     name="groups_resources",
+     *     joinColumns={@ORM\JoinColumn(name="resource_id", referencedColumnName="id")},
+     *     inverseJoinColumns={@ORM\JoinColumn(name="group_id", referencedColumnName="id")}
+     * )
+     */
     private ArrayCollection $resources;
 
     public function __construct(
