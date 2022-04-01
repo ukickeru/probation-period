@@ -1,7 +1,19 @@
 grumphp:
+    environment:
+        variables:
+            GRUMPHP_GIT_REPOSITORY_DIR: "../.git/"
     parallel:
         enabled: false
     tasks:
+        git_blacklist:
+            keywords:
+                - "die("
+                - "var_dump("
+                - "print_f("
+                - "dump("
+                # - "dd("
+                - "exit;"
+            triggered_by: ["php"]
         composer:
             no_check_lock: true
         phpcsfixer:
@@ -9,3 +21,5 @@ grumphp:
             level: 2
             ignore_patterns: ['tests/']
         phpunit:
+        phplint:
+        yamllint:

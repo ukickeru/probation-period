@@ -1,0 +1,15 @@
+doctrine:
+    orm:
+        mappings:
+
+            Mygento\AccessControl\Core\Entity:
+                is_bundle: false
+                dir: '%mygento.access_control.config.bundle_dir%/src/Core/Domain/Entity'
+                prefix: 'Mygento\AccessControl\Core\Entity'
+                alias: Mygento\AccessControl\Core\Entity
+
+            Mygento\AccessControl\ACL\Entity:
+                is_bundle: false
+                dir: '%mygento.access_control.config.bundle_dir%/src/ACL/Domain/Entity'
+                prefix: 'Mygento\AccessControl\ACL\Entity'
+                alias: Mygento\AccessControl\ACL\Entity

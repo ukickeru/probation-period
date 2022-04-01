@@ -1,0 +1,13 @@
+#!/bin/bash
+
+PROJECT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+
+TIME=$(date +"%Y-%m-%d_%T")
+
+PHPMETRICS_DIR="$PROJECT_DIR/var/phpmetrics"
+
+REPORT_DIR="$PHPMETRICS_DIR/$TIME"
+
+php $PROJECT_DIR/bin/phpunit --bootstrap $PROJECT_DIR/tests/bootstrap.php --configuration $PROJECT_DIR/phpunit.xml.dist --log-junit $PHPMETRICS_DIR/phpunit-last-result.xml
+
+php $PROJECT_DIR/vendor/bin/phpmetrics --report-html=$REPORT_DIR --junit=$PHPMETRICS_DIR/phpunit-last-result.xml $PROJECT_DIR

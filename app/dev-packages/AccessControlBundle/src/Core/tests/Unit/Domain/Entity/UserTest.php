@@ -1,9 +1,9 @@
 <?php
 
-namespace Mygento\AccessControlBundle\AccessControl\Core\tests\Unit\Domain\Entity;
+namespace Mygento\AccessControlBundle\Core\tests\Unit\Domain\Entity;
 
-use Mygento\AccessControlBundle\AccessControl\Core\Domain\Entity\Group;
-use Mygento\AccessControlBundle\AccessControl\Core\Domain\Entity\User;
+use Mygento\AccessControlBundle\Core\Domain\Entity\Group;
+use Mygento\AccessControlBundle\Core\Domain\Entity\User;
 use PHPUnit\Framework\TestCase;
 
 class UserTest extends TestCase
