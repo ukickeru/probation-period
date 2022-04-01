@@ -1,4 +1,5 @@
 parameters:
+    mygento.access_control.config.bundle_dir: '%kernel.project_dir%/vendor/mygento/access-control-bundle'
 
 services:
     _defaults:
@@ -10,11 +11,12 @@ services:
         resource: '../src/'
         exclude:
             - '../src/DependencyInjection/'
-            - '../src/Domain/Entity/'
+            - '../src/Core/Domain/Entity/'
+            - '../src/ACL/Domain/Entity/'
 
     mygento.access_control.facade:
-        class: 'Mygento\AccessControlBundle\AccessControl\Core\Facade'
+        class: 'Mygento\AccessControlBundle\Core\Facade'
         public: true
 
-    Mygento\AccessControlBundle\AccessControl\Core\Facade:
+    Mygento\AccessControlBundle\Core\Facade:
         alias: 'mygento.access_control.facade'

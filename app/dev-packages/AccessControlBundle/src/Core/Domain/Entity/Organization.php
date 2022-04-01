@@ -1,8 +1,8 @@
 <?php
 
-namespace Mygento\AccessControlBundle\AccessControl\Core\Domain\Entity;
+namespace Mygento\AccessControlBundle\Core\Domain\Entity;
 
-class Project
+class Organization
 {
     private $id;
 

@@ -1,10 +1,14 @@
 <?php
 
-namespace Mygento\AccessControlBundle\AccessControl\Core\Domain\Entity;
+namespace Mygento\AccessControlBundle\Core\Domain\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\ORM\Mapping as ORM;
 
-class Resource
+/**
+ * @ORM\Entity()
+ */
+class User
 {
     private $id;
 
@@ -33,7 +37,7 @@ class Resource
     {
         if (!$this->groups->contains($group)) {
             $this->groups->add($group);
-            $group->addResource($this);
+            $group->addUser($this);
         }
 
         return $this;
@@ -43,7 +47,7 @@ class Resource
     {
         if ($this->groups->contains($group)) {
             $this->groups->removeElement($group);
-            $group->removeResource($this);
+            $group->removeUser($this);
         }
 
         return $this;

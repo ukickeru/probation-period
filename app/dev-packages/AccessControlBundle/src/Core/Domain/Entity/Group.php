@@ -1,6 +1,6 @@
 <?php
 
-namespace Mygento\AccessControlBundle\AccessControl\Core\Domain\Entity;
+namespace Mygento\AccessControlBundle\Core\Domain\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
 

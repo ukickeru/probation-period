@@ -1,10 +1,10 @@
 <?php
 
-namespace Mygento\AccessControlBundle\AccessControl\Core\Domain\Entity;
+namespace Mygento\AccessControlBundle\Core\Domain\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
 
-class User
+class Resource
 {
     private $id;
 
@@ -33,7 +33,7 @@ class User
     {
         if (!$this->groups->contains($group)) {
             $this->groups->add($group);
-            $group->addUser($this);
+            $group->addResource($this);
         }
 
         return $this;
@@ -43,7 +43,7 @@ class User
     {
         if ($this->groups->contains($group)) {
             $this->groups->removeElement($group);
-            $group->removeUser($this);
+            $group->removeResource($this);
         }
 
         return $this;
