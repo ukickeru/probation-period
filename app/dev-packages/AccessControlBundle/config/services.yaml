@@ -1,0 +1,20 @@
+parameters:
+
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+        public: false
+
+    Mygento\AccessControlBundle\:
+        resource: '../src/'
+        exclude:
+            - '../src/DependencyInjection/'
+            - '../src/Domain/Entity/'
+
+    mygento.access_control.facade:
+        class: 'Mygento\AccessControlBundle\AccessControl\Core\Facade'
+        public: true
+
+    Mygento\AccessControlBundle\AccessControl\Core\Facade:
+        alias: 'mygento.access_control.facade'

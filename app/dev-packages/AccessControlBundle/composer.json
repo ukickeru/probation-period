@@ -1,0 +1,40 @@
+{
+    "type": "symfony-bundle",
+    "name": "mygento/access-control-bundle",
+    "license": "proprietary",
+    "version": "0.1",
+    "minimum-stability": "stable",
+    "description": "Mygento Symfony bundle for AccessControl",
+    "authors": [
+        {
+            "name": "Pavel Nikolaev",
+            "email": "p.nikolaev@mygento.ru"
+        }
+    ],
+    "require": {
+        "php": ">=7.4 || >=8.0",
+        "doctrine/doctrine-migrations-bundle": "^3.0",
+        "doctrine/orm": "^2.10",
+        "symfony/config": "^5.4 || ^6.0",
+        "symfony/dependency-injection": "^5.4 || ^6.0",
+        "symfony/http-kernel": "^5.4 || ^6.0"
+    },
+    "require-dev": {
+        "doctrine/doctrine-fixtures-bundle": "^3.4",
+        "mygento/coding-standard": "^2.14.0-beta4",
+        "symfony/phpunit-bridge": "^5.4 || ^6.0"
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "autoload": {
+        "psr-4": {
+            "Mygento\\AccessControlBundle\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Mygento\\AccessControlBundle\\Tests\\": "tests/"
+        }
+    }
+}
