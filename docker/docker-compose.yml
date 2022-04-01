@@ -25,6 +25,7 @@ services:
             - "database"
         volumes:
             - ./../app/:/var/app/
+        entrypoint: "sh ./start.sh"
 
     database:
         container_name: probation-database
