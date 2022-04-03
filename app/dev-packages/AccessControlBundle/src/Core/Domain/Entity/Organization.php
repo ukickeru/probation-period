@@ -3,6 +3,7 @@
 namespace Mygento\AccessControlBundle\Core\Domain\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Mygento\AccessControlBundle\Core\Domain\ValueObject\Id;
 
 /**
  * @ORM\Entity()
@@ -14,7 +15,7 @@ class Organization
      * @ORM\GeneratedValue()
      * @ORM\Column(type="integer")
      */
-    private $id;
+    private ?Id $id;
 
     /**
      * @ORM\OneToOne(targetEntity=Group::class)
@@ -23,9 +24,11 @@ class Organization
     private Group $group;
 
     public function __construct(
-        Group $group
+        Group $group,
+        ?Id $id = null
     ) {
         $this->group = $group;
+        $this->id = $id;
     }
 
     public function getId()

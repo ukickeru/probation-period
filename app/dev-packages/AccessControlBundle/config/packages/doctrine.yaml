@@ -4,12 +4,12 @@ doctrine:
 
             AccessControlBundle\Core:
                 type: annotation
-                dir: '%mygento.access_control.config.bundle_dir%/src/Core/Domain/Entity'
-                prefix: 'Mygento\AccessControlBundle\Core\Domain\Entity'
+                dir: '%mygento.access_control.config.bundle_dir%/src/Core/Domain'
+                prefix: 'Mygento\AccessControlBundle\Core\Domain'
                 alias: AccessControlBundle\Core
 
             AccessControlBundle\ACL:
                 type: annotation
-                dir: '%mygento.access_control.config.bundle_dir%/src/ACL/Domain/Entity'
-                prefix: 'Mygento\AccessControlBundle\ACL\Domain\Entity'
+                dir: '%mygento.access_control.config.bundle_dir%/src/ACL/Entity'
+                prefix: 'Mygento\AccessControlBundle\ACL\Entity'
                 alias: AccessControlBundle\ACL

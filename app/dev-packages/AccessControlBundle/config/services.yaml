@@ -6,6 +6,7 @@ services:
         autowire: true
         autoconfigure: true
         public: false
+        lazy: false
 
     Mygento\AccessControlBundle\:
         resource: '../src/'
@@ -13,13 +14,29 @@ services:
             - '../src/AccessControlBundle.php'
             - '../src/DependencyInjection/'
             - '../src/Core/Domain/Entity/'
-            - '../src/Core/tests/'
-            - '../src/ACL/Domain/Entity/'
-            - '../src/ACL/tests/'
+            - '../src/Core/Domain/ValueObject/'
+            - '../src/ACL/Entity/'
 
-    mygento.access_control.facade:
-        class: 'Mygento\AccessControlBundle\Core\Facade'
+    mygento.access_control.manager:
+        class: 'Mygento\AccessControlBundle\Core\Domain\Service\AccessControlManager'
+        public: true
+        lazy: true
+
+    Mygento\AccessControlBundle\Core\Domain\Service\AccessControlManager:
+        alias: 'mygento.access_control.manager'
+
+    mygento.access_control.security_voter:
+        class: 'Mygento\AccessControlBundle\Core\Domain\Service\SecurityVoter'
+        bind:
+            $accessControlChecker: '@mygento.access_control.access_control_checker'
         public: true
 
-    Mygento\AccessControlBundle\Core\Facade:
-        alias: 'mygento.access_control.facade'
+    Mygento\AccessControlBundle\Core\Domain\Service\SecurityVoter:
+        alias: 'mygento.access_control.security_voter'
+
+    mygento.access_control.access_control_checker:
+        class: 'Mygento\AccessControlBundle\ACL\Repository\ACERepository'
+        public: true
+
+    Mygento\AccessControlBundle\Core\Domain\Service\AccessControlCheckerInterface:
+        alias: 'mygento.access_control.access_control_checker'

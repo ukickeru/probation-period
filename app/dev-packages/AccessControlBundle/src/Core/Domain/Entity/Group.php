@@ -38,9 +38,12 @@ class Group
     private ArrayCollection $resources;
 
     public function __construct(
+        $id = null,
         ?iterable $users = [],
         ?iterable $resources = []
     ) {
+        $this->id = $id;
+
         $this->users = new ArrayCollection();
         foreach ($users as $user) {
             $this->addUser($user);

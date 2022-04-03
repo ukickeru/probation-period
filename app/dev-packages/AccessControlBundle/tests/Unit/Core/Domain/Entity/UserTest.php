@@ -1,6 +1,6 @@
 <?php
 
-namespace Mygento\AccessControlBundle\Tests\Unit\Domain\Entity;
+namespace Mygento\AccessControlBundle\Tests\Unit\Core\Domain\Entity;
 
 use Mygento\AccessControlBundle\Core\Domain\Entity\Group;
 use Mygento\AccessControlBundle\Core\Domain\Entity\User;
@@ -19,7 +19,7 @@ class UserTest extends TestCase
             new Group(),
         ];
 
-        $user = new User($groups);
+        $user = new User(null, $groups);
 
         $this->assertInstanceOf(User::class, $user);
         $this->assertCount(2, $user->getGroups());

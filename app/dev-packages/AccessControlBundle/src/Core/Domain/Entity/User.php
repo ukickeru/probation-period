@@ -23,8 +23,11 @@ class User
     private ArrayCollection $groups;
 
     public function __construct(
+        $id = null,
         ?iterable $groups = []
     ) {
+        $this->id = $id;
+
         $this->groups = new ArrayCollection();
         foreach ($groups as $group) {
             $this->addGroup($group);
