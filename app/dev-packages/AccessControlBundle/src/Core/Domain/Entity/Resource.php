@@ -3,10 +3,12 @@
 namespace Mygento\AccessControlBundle\Core\Domain\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Mygento\AccessControlBundle\Core\Repository\ResourceRepository;
 
 /**
- * @ORM\Entity()
+ * @ORM\Entity(repositoryClass=ResourceRepository::class)
  */
 class Resource
 {
@@ -20,11 +22,25 @@ class Resource
     /**
      * @ORM\ManyToMany(targetEntity=Group::class, mappedBy="resources")
      */
-    private ArrayCollection $groups;
+    private $groups;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=Organization::class, inversedBy="resources")
+     * @ORM\JoinColumn(name="organization_id", referencedColumnName="id", nullable=false)
+     */
+    private ?Organization $organization = null;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=Project::class, inversedBy="resources")
+     * @ORM\JoinColumn(name="project_id", referencedColumnName="id", nullable=false)
+     */
+    private ?Project $project = null;
 
     public function __construct(
         $id = null,
-        ?iterable $groups = []
+        iterable $groups = [],
+        ?Organization $organization = null,
+        ?Project $project = null
     ) {
         $this->id = $id;
 
@@ -32,6 +48,9 @@ class Resource
         foreach ($groups as $group) {
             $this->addGroup($group);
         }
+
+        $this->organization = $organization;
+        $this->project = $project;
     }
 
     public function getId()
@@ -39,7 +58,10 @@ class Resource
         return $this->id;
     }
 
-    public function getGroups(): ArrayCollection
+    /**
+     * @return Collection
+     */
+    public function getGroups()
     {
         return $this->groups;
     }
@@ -60,6 +82,30 @@ class Resource
             $this->groups->removeElement($group);
             $group->removeResource($this);
         }
+
+        return $this;
+    }
+
+    public function getOrganization(): ?Organization
+    {
+        return $this->organization;
+    }
+
+    public function setOrganization(?Organization $organization): self
+    {
+        $this->organization = $organization;
+
+        return $this;
+    }
+
+    public function getProject(): ?Project
+    {
+        return $this->project;
+    }
+
+    public function setProject(?Project $project): self
+    {
+        $this->project = $project;
 
         return $this;
     }

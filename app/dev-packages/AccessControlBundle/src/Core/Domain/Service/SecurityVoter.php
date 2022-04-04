@@ -20,14 +20,16 @@ class SecurityVoter
     }
 
     /**
+     * Checks if user has access to specified resource.
+     *
      * @param scalar $resourceId
-     * @param null $userId
-     * @return bool
-     * @throws AccessDeniedException if authorized user doesn't have an access to requested resource
+     * @param null   $userId     retrieved automatically by @Symfony\Security if not specified
+     *
+     * @throws AccessDeniedException if authorized user doesn't have access to requested resource
      */
     public function isGranted($resourceId, $userId = null): bool
     {
-        if ($userId === null) {
+        if (null === $userId) {
             $userId = $this->security->getUser()->getUserIdentifier();
         }
 

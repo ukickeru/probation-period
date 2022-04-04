@@ -3,8 +3,8 @@
 namespace Mygento\AccessControlBundle\Core\Repository;
 
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\ORM\Query\ResultSetMappingBuilder;
 use Doctrine\Persistence\ManagerRegistry;
+use Mygento\AccessControlBundle\Core\Domain\Entity\Resource;
 use Mygento\AccessControlBundle\Core\Domain\Entity\User;
 use Mygento\AccessControlBundle\Core\Domain\Service\AccessControlCheckerInterface;
 
@@ -13,10 +13,9 @@ use Mygento\AccessControlBundle\Core\Domain\Service\AccessControlCheckerInterfac
  * @method User|null findOneBy(array $criteria, array $orderBy = null)
  * @method User[]    findAll()
  * @method User[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
- *
  * @method User      findById($id)
- * @method void      save(object $object)
- * @method void      update(object $object)
+ * @method void      save(User $object)
+ * @method void      update(User $object)
  * @method void      remove($entityOrId)
  */
 class UserRepository extends ServiceEntityRepository implements AccessControlCheckerInterface
@@ -28,44 +27,54 @@ class UserRepository extends ServiceEntityRepository implements AccessControlChe
         parent::__construct($registry, User::class);
     }
 
-    public function getAllUserResources($id)
+    /**
+     * Returns array of resources ids, available for specified user.
+     */
+    public function getAllUserResources($userId): array
     {
-        $rsm = new ResultSetMappingBuilder($this->_em);
-        $rsm->addScalarResult('id', 'id');
+        $qb = $this->_em->createQueryBuilder();
 
-        $sql = 'SELECT (r.id) as id' .
-            'FROM resources r' .
-            'JOIN group_resources g_r ON r.id = g_r.resource_id' .
-            'JOIN group g ON g.id = g_r.group_id' .
-            'JOIN users_groups u_g ON g.id = u_g.group_id' .
-            'JOIN users u ON u.id = u_g.user_id' .
-            'WHERE u.id = :userId'
-        ;
-
-        return $this->_em->createNativeQuery($sql, $rsm)
-            ->setParameter('userId', $id)
-            ->getArrayResult();
+        return $qb->select('(r.id) as id')
+            ->distinct()
+            ->from(Resource::class, 'r')
+            ->join('r.groups', 'g')
+            ->join('g.users', 'u')
+            ->where(
+                $qb->expr()->eq('u.id', $userId)
+            )
+            ->getQuery()
+            ->getSingleColumnResult();
     }
 
+    /**
+     * Checks if specified user has access to specified resource.
+     */
     public function isResourceAvailableForUser($userId, $resourceId): bool
     {
-        $rsm = (new ResultSetMappingBuilder($this->_em))
-            ->addScalarResult('user_id', 'user_id')
-            ->addScalarResult('resource_id', 'resource_id');
+        $qb = $this->_em->createQueryBuilder();
 
-        $sql = 'SELECT (u.id) as user_id, (r.id) as resource_id' .
-            'FROM resources r' .
-            'JOIN group_resources g_r ON r.id = g_r.resource_id' .
-            'JOIN group g ON g.id = g_r.group_id' .
-            'JOIN users_groups u_g ON g.id = u_g.group_id' .
-            'JOIN users u ON u.id = u_g.user_id' .
-            'WHERE u.id = :userId' .
-            'AND WHERE r.id = :resourceId'
-        ;
+        try {
+            $ace = $qb->select('(r.id) as id')
+                ->distinct()
+                ->from(Resource::class, 'r')
+                ->join('r.groups', 'g')
+                ->join('g.users', 'u')
+                ->where(
+                    $qb->expr()->andX(
+                        $qb->expr()->eq('u.id', $userId),
+                        $qb->expr()->eq('r.id', $resourceId)
+                    )
+                )
+                ->getQuery()
+                ->getSingleScalarResult();
+        } catch (\Throwable) {
+            return false;
+        }
 
-        return $this->_em->createNativeQuery($sql, $rsm)
-            ->setParameter('userId', $userId)
-            ->setParameter('resourceId', $resourceId)
-            ->getArrayResult();
+        if (empty($ace)) {
+            return false;
+        }
+
+        return true;
     }
 }

@@ -14,7 +14,6 @@ use Mygento\AccessControlBundle\Core\Repository\DoctrineRepositoryTrait;
  * @method ACE|null findOneBy(array $criteria, array $orderBy = null)
  * @method ACE[]    findAll()
  * @method ACE[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
- *
  * @method ACE      findById($id)
  * @method void     save(object $object)
  * @method void     update(object $object)
@@ -33,7 +32,7 @@ class ACERepository extends ServiceEntityRepository implements AccessControlChec
     {
         return null !== $this->findOneBy([
             'userId' => $userId,
-            'resourceId' => $resourceId
+            'resourceId' => $resourceId,
         ]);
     }
 
@@ -42,12 +41,12 @@ class ACERepository extends ServiceEntityRepository implements AccessControlChec
         $rsm = new ResultSetMappingBuilder($this->_em);
         $rsm->addScalarResult('id', 'id');
 
-        $sql = 'SELECT (r.id) as id' .
-            'FROM resources r' .
-            'JOIN group_resources g_r ON r.id = g_r.resource_id' .
-            'JOIN group g ON g.id = g_r.group_id' .
-            'JOIN users_groups u_g ON g.id = u_g.group_id' .
-            'JOIN users u ON u.id = u_g.user_id' .
+        $sql = 'SELECT (r.id) as id'.
+            'FROM resources r'.
+            'JOIN group_resources g_r ON r.id = g_r.resource_id'.
+            'JOIN group g ON g.id = g_r.group_id'.
+            'JOIN users_groups u_g ON g.id = u_g.group_id'.
+            'JOIN users u ON u.id = u_g.user_id'.
             'WHERE u.id = :userId'
         ;
 

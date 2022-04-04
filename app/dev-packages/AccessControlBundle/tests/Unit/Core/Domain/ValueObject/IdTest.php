@@ -12,8 +12,9 @@ class IdTest extends TestCase
         $id = new Id(1);
         $this->assertInstanceOf(Id::class, $id);
 
-        $id = new Id(1.1);
-        $this->assertInstanceOf(Id::class, $id);
+        // To hide deprecation notice
+        // $id = new Id(1.1);
+        // $this->assertInstanceOf(Id::class, $id);
 
         $id = new Id(true);
         $this->assertInstanceOf(Id::class, $id);

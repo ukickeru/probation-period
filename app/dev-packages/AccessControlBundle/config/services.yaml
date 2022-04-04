@@ -6,7 +6,6 @@ services:
         autowire: true
         autoconfigure: true
         public: false
-        lazy: false
 
     Mygento\AccessControlBundle\:
         resource: '../src/'

@@ -3,10 +3,13 @@
 namespace Mygento\AccessControlBundle\Core\Domain\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Mygento\AccessControlBundle\Core\Repository\UserRepository;
 
 /**
- * @ORM\Entity()
+ * @ORM\Entity(repositoryClass=UserRepository::class)
+ * @ORM\Table(name="`user`")
  */
 class User
 {
@@ -20,11 +23,11 @@ class User
     /**
      * @ORM\ManyToMany(targetEntity=Group::class, mappedBy="users")
      */
-    private ArrayCollection $groups;
+    private $groups;
 
     public function __construct(
         $id = null,
-        ?iterable $groups = []
+        iterable $groups = []
     ) {
         $this->id = $id;
 
@@ -39,7 +42,10 @@ class User
         return $this->id;
     }
 
-    public function getGroups(): ArrayCollection
+    /**
+     * @return Collection
+     */
+    public function getGroups()
     {
         return $this->groups;
     }

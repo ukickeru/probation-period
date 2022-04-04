@@ -3,10 +3,13 @@
 namespace Mygento\AccessControlBundle\Core\Domain\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Mygento\AccessControlBundle\Core\Repository\GroupRepository;
 
 /**
- * @ORM\Entity()
+ * @ORM\Entity(repositoryClass=GroupRepository::class)
+ * @ORM\Table(name="`group`")
  */
 class Group
 {
@@ -19,28 +22,18 @@ class Group
 
     /**
      * @ORM\ManyToMany(targetEntity=User::class, inversedBy="groups")
-     * @ORM\JoinTable(
-     *     name="users_groups",
-     *     joinColumns={@ORM\JoinColumn(name="user_id", referencedColumnName="id")},
-     *     inverseJoinColumns={@ORM\JoinColumn(name="group_id", referencedColumnName="id")}
-     * )
      */
-    private ArrayCollection $users;
+    private $users;
 
     /**
      * @ORM\ManyToMany(targetEntity=Resource::class, inversedBy="groups")
-     * @ORM\JoinTable(
-     *     name="groups_resources",
-     *     joinColumns={@ORM\JoinColumn(name="resource_id", referencedColumnName="id")},
-     *     inverseJoinColumns={@ORM\JoinColumn(name="group_id", referencedColumnName="id")}
-     * )
      */
-    private ArrayCollection $resources;
+    private $resources;
 
     public function __construct(
         $id = null,
-        ?iterable $users = [],
-        ?iterable $resources = []
+        iterable $users = [],
+        iterable $resources = []
     ) {
         $this->id = $id;
 
@@ -60,7 +53,10 @@ class Group
         return $this->id;
     }
 
-    public function getUsers(): ArrayCollection
+    /**
+     * @return Collection
+     */
+    public function getUsers()
     {
         return $this->users;
     }
@@ -85,7 +81,10 @@ class Group
         return $this;
     }
 
-    public function getResources(): ArrayCollection
+    /**
+     * @return Collection
+     */
+    public function getResources()
     {
         return $this->resources;
     }

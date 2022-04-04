@@ -2,8 +2,9 @@
 
 namespace Mygento\AccessControlBundle\Core\Domain\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
-use Mygento\AccessControlBundle\Core\Domain\ValueObject\Id;
 
 /**
  * @ORM\Entity()
@@ -15,7 +16,7 @@ class Project
      * @ORM\GeneratedValue()
      * @ORM\Column(type="integer")
      */
-    private ?Id $id;
+    private $id;
 
     /**
      * @ORM\OneToOne(targetEntity=Group::class)
@@ -23,12 +24,23 @@ class Project
      */
     private Group $group;
 
+    /**
+     * @ORM\OneToMany(targetEntity=Resource::class, mappedBy="organization")
+     */
+    private $resources;
+
     public function __construct(
         Group $group,
-        ?Id $id = null
+        $id = null,
+        iterable $resources = []
     ) {
         $this->group = $group;
         $this->id = $id;
+
+        $this->resources = new ArrayCollection();
+        foreach ($resources as $resource) {
+            $this->addResource($resource);
+        }
     }
 
     public function getId()
@@ -39,5 +51,33 @@ class Project
     public function getGroup(): Group
     {
         return $this->group;
+    }
+
+    /**
+     * @return Collection
+     */
+    public function getResources()
+    {
+        return $this->resources;
+    }
+
+    public function addResource(Resource $resource): self
+    {
+        if (!$this->resources->contains($resource)) {
+            $this->resources->add($resource);
+            $resource->setProject($this);
+        }
+
+        return $this;
+    }
+
+    public function removeResource(Resource $resource): self
+    {
+        if ($this->resources->contains($resource)) {
+            $this->resources->removeElement($resource);
+            $resource->setProject(null);
+        }
+
+        return $this;
     }
 }
