@@ -41,4 +41,4 @@ RUN chmod 644 ./bin
 RUN composer install
 
 # Run entrypoint script
-ENTRYPOINT sh ./start.sh
+ENTRYPOINT ["/bin/bash", "/var/app/start.sh"]
