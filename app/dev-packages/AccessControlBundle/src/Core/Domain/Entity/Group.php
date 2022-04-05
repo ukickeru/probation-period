@@ -5,6 +5,7 @@ namespace Mygento\AccessControlBundle\Core\Domain\Entity;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Mygento\AccessControlBundle\Core\Domain\ValueObject\Name;
 use Mygento\AccessControlBundle\Core\Repository\GroupRepository;
 
 /**
@@ -21,6 +22,11 @@ class Group
     private $id;
 
     /**
+     * @ORM\Embedded(class=Name::class, columnPrefix="")
+     */
+    protected Name $name;
+
+    /**
      * @ORM\ManyToMany(targetEntity=User::class, inversedBy="groups")
      */
     private $users;
@@ -31,26 +37,42 @@ class Group
     private $resources;
 
     public function __construct(
-        $id = null,
-        iterable $users = [],
-        iterable $resources = []
+        Name $name,
+        iterable $users = null,
+        iterable $resources = null
     ) {
-        $this->id = $id;
+        $this->name = $name;
 
         $this->users = new ArrayCollection();
-        foreach ($users as $user) {
-            $this->addUser($user);
+        if (null !== $users) {
+            foreach ($users as $user) {
+                $this->addUser($user);
+            }
         }
 
         $this->resources = new ArrayCollection();
-        foreach ($resources as $resource) {
-            $this->addResource($resource);
+        if (null !== $resources) {
+            foreach ($resources as $resource) {
+                $this->addResource($resource);
+            }
         }
     }
 
     public function getId()
     {
         return $this->id;
+    }
+
+    public function getName(): Name
+    {
+        return $this->name;
+    }
+
+    public function setName(Name $name): self
+    {
+        $this->name = $name;
+
+        return $this;
     }
 
     /**

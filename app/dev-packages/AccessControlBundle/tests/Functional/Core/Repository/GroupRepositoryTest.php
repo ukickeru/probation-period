@@ -8,6 +8,7 @@ use Mygento\AccessControlBundle\Core\Domain\Entity\Organization;
 use Mygento\AccessControlBundle\Core\Domain\Entity\Project;
 use Mygento\AccessControlBundle\Core\Domain\Entity\Resource;
 use Mygento\AccessControlBundle\Core\Domain\Entity\User;
+use Mygento\AccessControlBundle\Core\Domain\ValueObject\Name;
 use Mygento\AccessControlBundle\Core\Repository\GroupRepository;
 use Mygento\AccessControlBundle\Core\Repository\ResourceRepository;
 use Mygento\AccessControlBundle\Core\Repository\UserRepository;
@@ -19,17 +20,19 @@ class GroupRepositoryTest extends BaseRepositoryTestCase
 
     public function testGetAllGroupUserIds()
     {
+        $name = new Name('Example');
+
         $users = [
-            $user1 = new User(),
-            $user2 = new User(),
-            $user3 = new User(),
+            $user1 = new User($name),
+            $user2 = new User($name),
+            $user3 = new User($name),
         ];
 
         foreach ($users as $user) {
             $this->entityManager->persist($user);
         }
 
-        $group = new Group(null, $users);
+        $group = new Group($name, $users);
         $this->entityManager->persist($group);
 
         $this->entityManager->flush();
@@ -41,7 +44,7 @@ class GroupRepositoryTest extends BaseRepositoryTestCase
             $users
         );
 
-        $availableUserIds = $this->repository->getAllGroupUserIds($group->getId());
+        $availableUserIds = $this->repository->getAllGroupUsersId($group->getId());
 
         $this->assertEquals($persistedUserIds, $availableUserIds);
 
@@ -49,24 +52,26 @@ class GroupRepositoryTest extends BaseRepositoryTestCase
         $resourceRepository = $this->entityManager->getRepository(User::class);
         $resourceRepository->remove($user1);
 
-        $this->assertCount(2, $this->repository->getAllGroupUserIds($group->getId()));
+        $this->assertCount(2, $this->repository->getAllGroupUsersId($group->getId()));
     }
 
     public function testGetAllGroupResourceIds()
     {
-        $group = new Group(null, []);
+        $name = new Name('Example');
+
+        $group = new Group($name);
         $this->entityManager->persist($group);
 
-        $organization = new Organization($group);
+        $organization = new Organization($name, $group);
         $this->entityManager->persist($organization);
 
-        $project = new Project($group);
+        $project = new Project($name, $group);
         $this->entityManager->persist($project);
 
         $resources = [
-            $resource1 = new Resource(null, [], $organization, $project),
-            $resource2 = new Resource(null, [], $organization, $project),
-            $resource3 = new Resource(null, [], $organization, $project),
+            $resource1 = new Resource([], $organization, $project),
+            $resource2 = new Resource([], $organization, $project),
+            $resource3 = new Resource([], $organization, $project),
         ];
 
         foreach ($resources as $resource) {
@@ -83,7 +88,7 @@ class GroupRepositoryTest extends BaseRepositoryTestCase
             $resources
         );
 
-        $availableResourceIds = $this->repository->getAllGroupResourceIds($group->getId());
+        $availableResourceIds = $this->repository->getAllGroupResourcesId($group->getId());
 
         $this->assertEquals($persistedResourceIds, $availableResourceIds);
 
@@ -91,7 +96,7 @@ class GroupRepositoryTest extends BaseRepositoryTestCase
         $resourceRepository = $this->entityManager->getRepository(Resource::class);
         $resourceRepository->remove($resource1);
 
-        $this->assertCount(2, $this->repository->getAllGroupResourceIds($group->getId()));
+        $this->assertCount(2, $this->repository->getAllGroupResourcesId($group->getId()));
     }
 
     protected function getEntityFQCN(): string

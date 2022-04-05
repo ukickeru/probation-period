@@ -4,14 +4,13 @@ namespace Mygento\AccessControlBundle\Tests\Functional\Core\Repository;
 
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\Tools\SchemaTool;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
 abstract class BaseRepositoryTestCase extends KernelTestCase
 {
-    protected ?EntityManagerInterface $entityManager;
+    use SchemaRecreationTrait;
 
-    protected ?SchemaTool $schemaTool;
+    protected ?EntityManagerInterface $entityManager;
 
     protected ?ServiceEntityRepository $repository;
 
@@ -25,21 +24,15 @@ abstract class BaseRepositoryTestCase extends KernelTestCase
 
         $this->repository = $this->entityManager->getRepository($this->getEntityFQCN());
 
-        // Drop and recreate tables for all entities
-        $this->schemaTool = new SchemaTool($this->entityManager);
-        $metadata = $this->entityManager->getMetadataFactory()->getAllMetadata();
-        $this->schemaTool->dropSchema($metadata);
-        $this->schemaTool->createSchema($metadata);
+        $this->recreateSchema($this->entityManager);
     }
 
     protected function tearDown(): void
     {
         parent::tearDown();
-
         // to avoid memory leaks
         $this->entityManager->close();
         $this->entityManager = null;
-        $this->schemaTool = null;
         $this->repository = null;
     }
 

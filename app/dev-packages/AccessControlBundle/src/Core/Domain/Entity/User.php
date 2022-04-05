@@ -5,6 +5,7 @@ namespace Mygento\AccessControlBundle\Core\Domain\Entity;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Mygento\AccessControlBundle\Core\Domain\ValueObject\Name;
 use Mygento\AccessControlBundle\Core\Repository\UserRepository;
 
 /**
@@ -21,15 +22,20 @@ class User
     private $id;
 
     /**
+     * @ORM\Embedded(class=Name::class, columnPrefix="")
+     */
+    protected Name $name;
+
+    /**
      * @ORM\ManyToMany(targetEntity=Group::class, mappedBy="users")
      */
     private $groups;
 
     public function __construct(
-        $id = null,
+        Name $name,
         iterable $groups = []
     ) {
-        $this->id = $id;
+        $this->name = $name;
 
         $this->groups = new ArrayCollection();
         foreach ($groups as $group) {
@@ -40,6 +46,18 @@ class User
     public function getId()
     {
         return $this->id;
+    }
+
+    public function getName(): Name
+    {
+        return $this->name;
+    }
+
+    public function setName(Name $name): self
+    {
+        $this->name = $name;
+
+        return $this;
     }
 
     /**

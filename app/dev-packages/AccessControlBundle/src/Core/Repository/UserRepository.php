@@ -4,7 +4,6 @@ namespace Mygento\AccessControlBundle\Core\Repository;
 
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
-use Mygento\AccessControlBundle\Core\Domain\Entity\Resource;
 use Mygento\AccessControlBundle\Core\Domain\Entity\User;
 use Mygento\AccessControlBundle\Core\Domain\Service\AccessControlCheckerInterface;
 
@@ -27,23 +26,38 @@ class UserRepository extends ServiceEntityRepository implements AccessControlChe
         parent::__construct($registry, User::class);
     }
 
+    public function getAllUsersId(): array
+    {
+        $connection = $this->_em->getConnection();
+        $sql = 'SELECT DISTINCT u.id
+                FROM "user" u
+                ORDER BY u.id';
+
+        return $connection
+            ->prepare($sql)
+            ->executeQuery()
+            ->fetchFirstColumn();
+    }
+
     /**
      * Returns array of resources ids, available for specified user.
      */
-    public function getAllUserResources($userId): array
+    public function getResourcesIdAvailableForUser($userId): array
     {
-        $qb = $this->_em->createQueryBuilder();
+        $connection = $this->_em->getConnection();
+        $sql = 'SELECT DISTINCT r.id
+                FROM resource r
+                JOIN group_resource gr on r.id = gr.resource_id
+                JOIN "group" g on g.id = gr.group_id
+                JOIN group_user gu on g.id = gu.group_id
+                JOIN "user" u on u.id = gu.user_id
+                WHERE u.id = ?
+                ORDER BY r.id';
 
-        return $qb->select('(r.id) as id')
-            ->distinct()
-            ->from(Resource::class, 'r')
-            ->join('r.groups', 'g')
-            ->join('g.users', 'u')
-            ->where(
-                $qb->expr()->eq('u.id', $userId)
-            )
-            ->getQuery()
-            ->getSingleColumnResult();
+        return $connection
+            ->prepare($sql)
+            ->executeQuery([$userId])
+            ->fetchFirstColumn();
     }
 
     /**
@@ -51,23 +65,22 @@ class UserRepository extends ServiceEntityRepository implements AccessControlChe
      */
     public function isResourceAvailableForUser($userId, $resourceId): bool
     {
-        $qb = $this->_em->createQueryBuilder();
-
         try {
-            $ace = $qb->select('(r.id) as id')
-                ->distinct()
-                ->from(Resource::class, 'r')
-                ->join('r.groups', 'g')
-                ->join('g.users', 'u')
-                ->where(
-                    $qb->expr()->andX(
-                        $qb->expr()->eq('u.id', $userId),
-                        $qb->expr()->eq('r.id', $resourceId)
-                    )
-                )
-                ->getQuery()
-                ->getSingleScalarResult();
-        } catch (\Throwable) {
+            $connection = $this->_em->getConnection();
+            $sql = 'SELECT DISTINCT r.id
+                FROM resource r
+                JOIN group_resource gr on r.id = gr.resource_id
+                JOIN "group" g on g.id = gr.group_id
+                JOIN group_user gu on g.id = gu.group_id
+                JOIN "user" u on u.id = gu.user_id
+                WHERE u.id = ? AND r.id = ?
+                ORDER BY r.id';
+
+            $ace = $connection
+                ->prepare($sql)
+                ->executeQuery([$userId, $resourceId])
+                ->fetchFirstColumn();
+        } catch (\Throwable $throwable) {
             return false;
         }
 

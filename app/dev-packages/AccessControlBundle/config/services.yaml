@@ -16,6 +16,7 @@ services:
             - '../src/Core/Domain/ValueObject/'
             - '../src/ACL/Entity/'
 
+
     mygento.access_control.manager:
         class: 'Mygento\AccessControlBundle\Core\Domain\Service\AccessControlManager'
         public: true
@@ -23,6 +24,7 @@ services:
 
     Mygento\AccessControlBundle\Core\Domain\Service\AccessControlManager:
         alias: 'mygento.access_control.manager'
+
 
     mygento.access_control.security_voter:
         class: 'Mygento\AccessControlBundle\Core\Domain\Service\SecurityVoter'
@@ -33,9 +35,18 @@ services:
     Mygento\AccessControlBundle\Core\Domain\Service\SecurityVoter:
         alias: 'mygento.access_control.security_voter'
 
+
     mygento.access_control.access_control_checker:
         class: 'Mygento\AccessControlBundle\ACL\Repository\ACERepository'
         public: true
 
     Mygento\AccessControlBundle\Core\Domain\Service\AccessControlCheckerInterface:
         alias: 'mygento.access_control.access_control_checker'
+
+
+    Mygento\AccessControlBundle\ACL\Domain\Service\ACESynchronizer:
+        alias: 'mygento.access_control.ace_synchronizer'
+
+    mygento.access_control.ace_synchronizer:
+        class: 'Mygento\AccessControlBundle\ACL\Domain\Service\ACESynchronizer'
+        public: true

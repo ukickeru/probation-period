@@ -5,6 +5,7 @@ namespace Mygento\AccessControlBundle\Core\Domain\Entity;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Mygento\AccessControlBundle\Core\Domain\ValueObject\Name;
 use Mygento\AccessControlBundle\Core\Repository\ResourceRepository;
 
 /**
@@ -26,24 +27,21 @@ class Resource
 
     /**
      * @ORM\ManyToOne(targetEntity=Organization::class, inversedBy="resources")
-     * @ORM\JoinColumn(name="organization_id", referencedColumnName="id", nullable=false)
+     * @ORM\JoinColumn(name="organization_id", referencedColumnName="id", nullable=true)
      */
-    private ?Organization $organization = null;
+    private ?Organization $organization;
 
     /**
      * @ORM\ManyToOne(targetEntity=Project::class, inversedBy="resources")
-     * @ORM\JoinColumn(name="project_id", referencedColumnName="id", nullable=false)
+     * @ORM\JoinColumn(name="project_id", referencedColumnName="id", nullable=true)
      */
-    private ?Project $project = null;
+    private ?Project $project;
 
     public function __construct(
-        $id = null,
         iterable $groups = [],
         ?Organization $organization = null,
         ?Project $project = null
     ) {
-        $this->id = $id;
-
         $this->groups = new ArrayCollection();
         foreach ($groups as $group) {
             $this->addGroup($group);

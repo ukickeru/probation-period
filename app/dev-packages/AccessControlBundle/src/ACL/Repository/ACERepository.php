@@ -3,11 +3,14 @@
 namespace Mygento\AccessControlBundle\ACL\Repository;
 
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\ORM\Query\ResultSetMappingBuilder;
+use Doctrine\DBAL\TransactionIsolationLevel;
 use Doctrine\Persistence\ManagerRegistry;
-use Mygento\AccessControlBundle\ACL\Entity\ACE;
+use Mygento\AccessControlBundle\ACL\Domain\Entity\ACE;
+use Mygento\AccessControlBundle\ACL\Domain\Service\ACEsCollection;
 use Mygento\AccessControlBundle\Core\Domain\Service\AccessControlCheckerInterface;
 use Mygento\AccessControlBundle\Core\Repository\DoctrineRepositoryTrait;
+use Mygento\AccessControlBundle\Core\Repository\GroupRepository;
+use Mygento\AccessControlBundle\Core\Repository\UserRepository;
 
 /**
  * @method ACE|null find($id, $lockMode = null, $lockVersion = null)
@@ -23,56 +26,84 @@ class ACERepository extends ServiceEntityRepository implements AccessControlChec
 {
     use DoctrineRepositoryTrait;
 
-    public function __construct(ManagerRegistry $registry)
-    {
+    private UserRepository $userRepository;
+
+    private GroupRepository $groupRepository;
+
+    public function __construct(
+        ManagerRegistry $registry,
+        UserRepository $userRepository,
+        GroupRepository $groupRepository
+    ) {
         parent::__construct($registry, ACE::class);
+
+        $this->userRepository = $userRepository;
+        $this->groupRepository = $groupRepository;
     }
 
     public function isResourceAvailableForUser($userId, $resourceId): bool
     {
-        return null !== $this->findOneBy([
-            'userId' => $userId,
-            'resourceId' => $resourceId,
-        ]);
+        $connection = $this->_em->getConnection();
+
+        $sql = 'SELECT ace.resource_id FROM ace WHERE ace.user_id = ? AND ace.resource_id = ?';
+
+        return 1 === $connection->prepare($sql)->executeQuery([$userId, $resourceId])->rowCount();
     }
 
-    public function synchronizeUserACL($userId): void
+    public function getResourcesIdAvailableForUser($userId): array
     {
-        $rsm = new ResultSetMappingBuilder($this->_em);
-        $rsm->addScalarResult('id', 'id');
+        $connection = $this->_em->getConnection();
 
-        $sql = 'SELECT (r.id) as id'.
-            'FROM resources r'.
-            'JOIN group_resources g_r ON r.id = g_r.resource_id'.
-            'JOIN group g ON g.id = g_r.group_id'.
-            'JOIN users_groups u_g ON g.id = u_g.group_id'.
-            'JOIN users u ON u.id = u_g.user_id'.
-            'WHERE u.id = :userId'
-        ;
+        $sql = 'SELECT ace.resource_id FROM ace WHERE ace.user_id = ?';
 
-        $userResourcesIds = $this->_em->createNativeQuery($sql, $rsm)
-            ->setParameter('userId', $userId)
-            ->getArrayResult();
-
-        $qb = $this->_em->createQueryBuilder();
-        $ACEsThatAlreadyExists = $qb->select('resourceId')
-            ->from(ACE::class, 'ace')
-            ->where($qb->expr()->in('ace.resourceId', $userResourcesIds))
-            ->getQuery()
-            ->getArrayResult();
-
-        $resourcesToCreateACE = array_diff($ACEsThatAlreadyExists, $userResourcesIds);
-
-        // todo
+        return $connection->prepare($sql)->executeQuery([$userId])->fetchFirstColumn();
     }
 
-    public function synchronizeGroupACL($groupId)
-    {
-        // todo
+    public function updateACEs(
+        ACEsCollection $ACEsToInsert,
+        ACEsCollection $ACEsToRemove
+    ): void {
+        $connection = $this->_em->getConnection();
+        $connection->setTransactionIsolation(TransactionIsolationLevel::SERIALIZABLE);
+
+        $connection->beginTransaction();
+        try {
+            $sql = 'INSERT INTO ace (user_id, resource_id) VALUES '.$ACEsToInsert;
+            $connection->prepare($sql)->executeQuery();
+
+            $connection->beginTransaction();
+            try {
+                $sql = 'DELETE FROM ace WHERE (user_id, resource_id) IN ('.$ACEsToRemove.')';
+                $connection->prepare($sql)->executeQuery();
+
+                $connection->commit();
+            } catch (\Throwable $exception) {
+                $connection->rollBack();
+                throw new \Exception('Can not remove access control entries.', $exception->getCode(), $exception);
+            }
+
+            $connection->commit();
+        } catch (\Throwable $exception) {
+            $connection->rollBack();
+            throw new \Exception('Can not insert access control entries.', $exception->getPrevious()->getCode(), $exception);
+        }
     }
 
-    public function synchronizeResourceACL($userId)
+    public function insertACEs(ACEsCollection $ACEs)
     {
-        // todo
+        $connection = $this->_em->getConnection();
+
+        $sql = 'INSERT INTO ace (user_id, resource_id) VALUES '.$ACEs;
+
+        $connection->prepare($sql)->executeQuery();
+    }
+
+    public function removeACEs(ACEsCollection $ACEs)
+    {
+        $connection = $this->_em->getConnection();
+
+        $sql = 'DELETE FROM ace WHERE (ace.user_id, ace.resource_id) IN ('.$ACEs.')';
+
+        $connection->prepare($sql)->executeQuery();
     }
 }

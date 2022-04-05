@@ -5,9 +5,11 @@ namespace Mygento\AccessControlBundle\Core\Domain\Entity;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Mygento\AccessControlBundle\Core\Domain\ValueObject\Name;
+use Mygento\AccessControlBundle\Core\Repository\OrganizationRepository;
 
 /**
- * @ORM\Entity()
+ * @ORM\Entity(repositoryClass=OrganizationRepository::class)
  */
 class Organization
 {
@@ -16,36 +18,55 @@ class Organization
      * @ORM\GeneratedValue()
      * @ORM\Column(type="integer")
      */
-    private $id;
+    protected $id;
 
     /**
-     * @ORM\OneToOne(targetEntity=Group::class)
-     * @ORM\JoinColumn(name="group_id", referencedColumnName="id")
+     * @ORM\Embedded(class=Name::class, columnPrefix="")
      */
-    private Group $group;
+    protected Name $name;
+
+    /**
+     * @ORM\OneToOne(targetEntity=Group::class, cascade={"persist", "remove"})
+     * @ORM\JoinColumn(name="group_id", referencedColumnName="id", nullable=false, onDelete="CASCADE")
+     */
+    protected Group $group;
 
     /**
      * @ORM\OneToMany(targetEntity=Resource::class, mappedBy="organization")
      */
-    private $resources;
+    protected $resources;
 
     public function __construct(
+        Name $name,
         Group $group,
-        $id = null,
-        iterable $resources = []
+        iterable $resources = null
     ) {
+        $this->name = $name;
         $this->group = $group;
-        $this->id = $id;
 
         $this->resources = new ArrayCollection();
-        foreach ($resources as $resource) {
-            $this->addResource($resource);
+        if (null !== $resources) {
+            foreach ($resources as $resource) {
+                $this->addResource($resource);
+            }
         }
     }
 
     public function getId()
     {
         return $this->id;
+    }
+
+    public function getName(): Name
+    {
+        return $this->name;
+    }
+
+    public function setName(Name $name): self
+    {
+        $this->name = $name;
+
+        return $this;
     }
 
     public function getGroup(): Group

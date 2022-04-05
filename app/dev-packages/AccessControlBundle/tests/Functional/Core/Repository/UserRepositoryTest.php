@@ -8,6 +8,7 @@ use Mygento\AccessControlBundle\Core\Domain\Entity\Organization;
 use Mygento\AccessControlBundle\Core\Domain\Entity\Project;
 use Mygento\AccessControlBundle\Core\Domain\Entity\Resource;
 use Mygento\AccessControlBundle\Core\Domain\Entity\User;
+use Mygento\AccessControlBundle\Core\Domain\ValueObject\Name;
 use Mygento\AccessControlBundle\Core\Repository\ResourceRepository;
 use Mygento\AccessControlBundle\Core\Repository\UserRepository;
 
@@ -18,7 +19,9 @@ class UserRepositoryTest extends BaseRepositoryTestCase
 
     public function testCreationAndUpdating()
     {
-        $user = new User();
+        $name = new Name('Example');
+
+        $user = new User($name);
 
         $this->repository->save($user);
 
@@ -43,7 +46,9 @@ class UserRepositoryTest extends BaseRepositoryTestCase
 
     public function testRemoving()
     {
-        $user = new User();
+        $name = new Name('Example');
+
+        $user = new User($name);
 
         $this->repository->save($user);
 
@@ -68,21 +73,29 @@ class UserRepositoryTest extends BaseRepositoryTestCase
         }
     }
 
-    public function testGetAvailableUserResources()
+    public function testGetAllUserIds()
     {
-        $group = new Group(null, []);
+        $name = new Name('Example');
+        for ($i = 0; $i < 5; ++$i) {
+            $user = new User($name);
+            $this->entityManager->persist($user);
+        }
+        $this->entityManager->flush();
+
+        $this->assertCount(5, $this->repository->getAllUsersId());
+    }
+
+    public function testGetResourcesIdsAvailableForUser()
+    {
+        $name = new Name('Example');
+
+        $group = new Group($name);
         $this->entityManager->persist($group);
 
-        $organization = new Organization($group);
-        $this->entityManager->persist($organization);
-
-        $project = new Project($group);
-        $this->entityManager->persist($project);
-
         $resources = [
-            $resource1 = new Resource(null, [], $organization, $project),
-            $resource2 = new Resource(null, [], $organization, $project),
-            $resource3 = new Resource(null, [], $organization, $project),
+            $resource1 = new Resource(),
+            $resource2 = new Resource(),
+            $resource3 = new Resource(),
         ];
 
         foreach ($resources as $resource) {
@@ -90,8 +103,8 @@ class UserRepositoryTest extends BaseRepositoryTestCase
         }
 
         $groups = [
-            $group1 = new Group(),
-            $group2 = new Group(),
+            $group1 = new Group($name),
+            $group2 = new Group($name),
         ];
 
         foreach ($groups as $group) {
@@ -106,7 +119,7 @@ class UserRepositoryTest extends BaseRepositoryTestCase
             ->addResource($resource2)
             ->addResource($resource3);
 
-        $user = new User(null, $groups);
+        $user = new User($name, $groups);
         $this->entityManager->persist($user);
 
         $this->entityManager->flush();
@@ -118,26 +131,28 @@ class UserRepositoryTest extends BaseRepositoryTestCase
             $resources
         );
 
-        $availableResourcesIds = $this->repository->getAllUserResources($user->getId());
+        $availableResourcesIds = $this->repository->getResourcesIdAvailableForUser($user->getId());
 
         $this->assertEquals($persistedResourcesIds, $availableResourcesIds);
     }
 
     public function testIsResourceAvailableForUser()
     {
-        $group = new Group(null, []);
+        $name = new Name('Example');
+
+        $group = new Group($name);
         $this->entityManager->persist($group);
 
-        $organization = new Organization($group);
+        $organization = new Organization($name, $group);
         $this->entityManager->persist($organization);
 
-        $project = new Project($group);
+        $project = new Project($name, $group);
         $this->entityManager->persist($project);
 
         $resources = [
-            $resource1 = new Resource(null, [], $organization, $project),
-            $resource2 = new Resource(null, [], $organization, $project),
-            $resource3 = new Resource(null, [], $organization, $project),
+            $resource1 = new Resource([], $organization, $project),
+            $resource2 = new Resource([], $organization, $project),
+            $resource3 = new Resource([], $organization, $project),
         ];
 
         foreach ($resources as $resource) {
@@ -145,8 +160,8 @@ class UserRepositoryTest extends BaseRepositoryTestCase
         }
 
         $groups = [
-            $group1 = new Group(),
-            $group2 = new Group(),
+            $group1 = new Group($name),
+            $group2 = new Group($name),
         ];
 
         foreach ($groups as $group) {
@@ -161,7 +176,7 @@ class UserRepositoryTest extends BaseRepositoryTestCase
             ->addResource($resource2)
             ->addResource($resource3);
 
-        $user = new User(null, $groups);
+        $user = new User($name, $groups);
         $this->entityManager->persist($user);
 
         $this->entityManager->flush();

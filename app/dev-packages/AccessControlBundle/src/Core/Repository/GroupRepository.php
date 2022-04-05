@@ -5,8 +5,6 @@ namespace Mygento\AccessControlBundle\Core\Repository;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use Mygento\AccessControlBundle\Core\Domain\Entity\Group;
-use Mygento\AccessControlBundle\Core\Domain\Entity\Resource;
-use Mygento\AccessControlBundle\Core\Domain\Entity\User;
 
 /**
  * @method Group|null find($id, $lockMode = null, $lockVersion = null)
@@ -30,38 +28,40 @@ class GroupRepository extends ServiceEntityRepository
     /**
      * Returns array of resources ids, available for specified user.
      */
-    public function getAllGroupUserIds($groupId): array
+    public function getAllGroupUsersId($groupId): array
     {
-        $qb = $this->_em->createQueryBuilder();
+        $connection = $this->_em->getConnection();
 
-        return $qb->select('(u.id) as id')
-            ->distinct()
-            ->from(User::class, 'u')
-            ->join('u.groups', 'g')
-            ->where(
-                $qb->expr()->eq('g.id', ':groupId')
-            )
-            ->setParameter('groupId', $groupId)
-            ->getQuery()
-            ->getSingleColumnResult();
+        $sql = 'SELECT DISTINCT u.id
+                FROM "group" g
+                JOIN group_user gu on g.id = gu.group_id
+                JOIN "user" u on u.id = gu.user_id
+                WHERE g.id = ?
+                ORDER BY u.id';
+
+        return $connection
+            ->prepare($sql)
+            ->executeQuery([$groupId])
+            ->fetchFirstColumn();
     }
 
     /**
      * Returns array of resources ids, available for specified user.
      */
-    public function getAllGroupResourceIds($groupId): array
+    public function getAllGroupResourcesId($groupId): array
     {
-        $qb = $this->_em->createQueryBuilder();
+        $connection = $this->_em->getConnection();
 
-        return $qb->select('(r.id) as id')
-            ->distinct()
-            ->from(Resource::class, 'r')
-            ->join('r.groups', 'g')
-            ->where(
-                $qb->expr()->eq('g.id', ':groupId')
-            )
-            ->setParameter('groupId', $groupId)
-            ->getQuery()
-            ->getSingleColumnResult();
+        $sql = 'SELECT DISTINCT r.id
+                FROM "group" g
+                JOIN group_resource gr on g.id = gr.group_id
+                JOIN resource r on r.id = gr.resource_id
+                WHERE g.id = ?
+                ORDER BY r.id';
+
+        return $connection
+            ->prepare($sql)
+            ->executeQuery([$groupId])
+            ->fetchFirstColumn();
     }
 }

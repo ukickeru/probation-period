@@ -5,19 +5,22 @@ namespace Mygento\AccessControlBundle\Tests\Unit\Core\Domain\Entity;
 use Mygento\AccessControlBundle\Core\Domain\Entity\Group;
 use Mygento\AccessControlBundle\Core\Domain\Entity\Resource;
 use Mygento\AccessControlBundle\Core\Domain\Entity\User;
+use Mygento\AccessControlBundle\Core\Domain\ValueObject\Name;
 use PHPUnit\Framework\TestCase;
 
 class GroupTest extends TestCase
 {
     public function testBehavior()
     {
-        $group = new Group();
+        $name = new Name('Example');
+
+        $group = new Group($name);
 
         $this->assertInstanceOf(Group::class, $group);
 
         $users = [
-            $user = new User(),
-            new User(),
+            $user = new User($name),
+            new User($name),
         ];
 
         $resources = [
@@ -25,7 +28,7 @@ class GroupTest extends TestCase
             new Resource(),
         ];
 
-        $group = new Group(null, $users, $resources);
+        $group = new Group($name, $users, $resources);
 
         $this->assertInstanceOf(Group::class, $group);
 
