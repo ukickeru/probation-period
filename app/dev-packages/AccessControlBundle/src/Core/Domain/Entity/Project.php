@@ -5,6 +5,7 @@ namespace Mygento\AccessControlBundle\Core\Domain\Entity;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Mygento\AccessControlBundle\Core\Domain\ValueObject\Id;
 use Mygento\AccessControlBundle\Core\Domain\ValueObject\Name;
 use Mygento\AccessControlBundle\Core\Repository\ProjectRepository;
 
@@ -15,19 +16,18 @@ class Project
 {
     /**
      * @ORM\Id()
-     * @ORM\GeneratedValue()
-     * @ORM\Column(type="integer")
+     * @ORM\Embedded(class=Id::class)
      */
-    private $id;
+    private ?Id $id;
 
     /**
-     * @ORM\Embedded(class=Name::class, columnPrefix="")
+     * @ORM\Embedded(class=Name::class)
      */
     protected Name $name;
 
     /**
      * @ORM\OneToOne(targetEntity=Group::class, cascade={"persist"})
-     * @ORM\JoinColumn(name="group_id", referencedColumnName="id", nullable=false, onDelete="CASCADE")
+     * @ORM\JoinColumn(name="group_id", referencedColumnName="id_value", nullable=false, onDelete="CASCADE")
      */
     private Group $group;
 
@@ -39,20 +39,18 @@ class Project
     public function __construct(
         Name $name,
         Group $group,
-        iterable $resources = null
+        iterable $resources = []
     ) {
         $this->name = $name;
         $this->group = $group;
 
         $this->resources = new ArrayCollection();
-        if (null !== $resources) {
-            foreach ($resources as $resource) {
-                $this->addResource($resource);
-            }
+        foreach ($resources as $resource) {
+            $this->addResource($resource);
         }
     }
 
-    public function getId()
+    public function getId(): ?Id
     {
         return $this->id;
     }

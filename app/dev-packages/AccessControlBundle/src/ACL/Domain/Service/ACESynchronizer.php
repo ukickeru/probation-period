@@ -3,6 +3,7 @@
 namespace Mygento\AccessControlBundle\ACL\Domain\Service;
 
 use Mygento\AccessControlBundle\ACL\Repository\ACERepository;
+use Mygento\AccessControlBundle\Core\Domain\ValueObject\Id;
 use Mygento\AccessControlBundle\Core\Repository\UserRepository;
 
 class ACESynchronizer
@@ -21,14 +22,14 @@ class ACESynchronizer
 
     public function synchronizeACEGlobally(): void
     {
-        $allUserIds = $this->userRepository->getAllUsersId();
+        $ACL = $this->userRepository->getACL();
 
-        foreach ($allUserIds as $userId) {
-            $this->synchronizeACEForUser($userId);
-        }
+        $ACEs = new ACEsCollection($ACL);
+
+        $this->ACERepository->updateACLGlobally($ACEs);
     }
 
-    public function synchronizeACEForUser($userId): void
+    public function synchronizeACEForUser(Id $userId): void
     {
         $resourcesIdAlreadyAvailableForUser = $this->userRepository->getResourcesIdAvailableForUser($userId);
 

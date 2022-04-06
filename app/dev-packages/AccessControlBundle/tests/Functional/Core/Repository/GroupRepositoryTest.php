@@ -39,7 +39,7 @@ class GroupRepositoryTest extends BaseRepositoryTestCase
 
         $persistedUserIds = array_map(
             function ($user) {
-                return $user->getId();
+                return $user->getId()->value();
             },
             $users
         );
@@ -83,7 +83,7 @@ class GroupRepositoryTest extends BaseRepositoryTestCase
 
         $persistedResourceIds = array_map(
             function ($resource) {
-                return $resource->getId();
+                return $resource->getId()->value();
             },
             $resources
         );

@@ -5,6 +5,7 @@ namespace Mygento\AccessControlBundle\Core\Domain\Entity;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Mygento\AccessControlBundle\Core\Domain\ValueObject\Id;
 use Mygento\AccessControlBundle\Core\Domain\ValueObject\Name;
 use Mygento\AccessControlBundle\Core\Repository\UserRepository;
 
@@ -16,10 +17,9 @@ class User
 {
     /**
      * @ORM\Id()
-     * @ORM\GeneratedValue()
-     * @ORM\Column(type="integer")
+     * @ORM\Embedded(class=Id::class)
      */
-    private $id;
+    private ?Id $id;
 
     /**
      * @ORM\Embedded(class=Name::class, columnPrefix="")
@@ -43,7 +43,7 @@ class User
         }
     }
 
-    public function getId()
+    public function getId(): ?Id
     {
         return $this->id;
     }

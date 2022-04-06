@@ -8,6 +8,7 @@ use Mygento\AccessControlBundle\Core\Domain\Entity\Organization;
 use Mygento\AccessControlBundle\Core\Domain\Entity\Project;
 use Mygento\AccessControlBundle\Core\Domain\Entity\Resource;
 use Mygento\AccessControlBundle\Core\Domain\Entity\User;
+use Mygento\AccessControlBundle\Core\Domain\ValueObject\Id;
 use Mygento\AccessControlBundle\Core\Domain\ValueObject\Name;
 use Mygento\AccessControlBundle\Core\Repository\GroupRepository;
 use Mygento\AccessControlBundle\Core\Repository\OrganizationRepository;
@@ -49,7 +50,7 @@ class AccessControlManager
         $this->projectRepository = $projectRepository;
     }
 
-    public function isGranted($resourceId, $userId = null): bool
+    public function isGranted(Id $resourceId, Id $userId = null): bool
     {
         return $this->securityVoter->isGranted($resourceId, $userId);
     }
@@ -68,7 +69,7 @@ class AccessControlManager
         return $user;
     }
 
-    public function editUser($id, Name $name, array $groups = []): User
+    public function editUser(Id $id, Name $name, array $groups = []): User
     {
         $user = $this->userRepository->findById($id);
 
@@ -88,12 +89,12 @@ class AccessControlManager
 
         $this->userRepository->save($user);
 
-        $this->ACESynchronizer->synchronizeACEGlobally();
+        $this->ACESynchronizer->synchronizeACEForUser($user->getId());
 
         return $user;
     }
 
-    public function removeUser($id): void
+    public function removeUser(Id $id): void
     {
         $this->userRepository->remove($id);
     }
@@ -109,7 +110,7 @@ class AccessControlManager
         return $group;
     }
 
-    public function editGroup($id, Name $name, array $users = [], array $resources = []): Group
+    public function editGroup(Id $id, Name $name, array $users = [], array $resources = []): Group
     {
         $group = $this->groupRepository->findById($id);
 
@@ -146,7 +147,7 @@ class AccessControlManager
         return $group;
     }
 
-    public function removeGroup($id): void
+    public function removeGroup(Id $id): void
     {
         $this->groupRepository->remove($id);
     }
@@ -162,7 +163,7 @@ class AccessControlManager
         return $resource;
     }
 
-    public function editResource($id, array $groups = []): Resource
+    public function editResource(Id $id, array $groups = []): Resource
     {
         $resource = $this->resourceRepository->findById($id);
 
@@ -185,7 +186,7 @@ class AccessControlManager
         return $resource;
     }
 
-    public function removeResource($id): void
+    public function removeResource(Id $id): void
     {
         $this->resourceRepository->remove($id);
     }
@@ -202,7 +203,7 @@ class AccessControlManager
         return $project;
     }
 
-    public function editProject($id, Name $name): Project
+    public function editProject(Id $id, Name $name): Project
     {
         $project = $this->projectRepository->findById($id);
 
@@ -212,7 +213,7 @@ class AccessControlManager
         return $project;
     }
 
-    public function removeProject($id): void
+    public function removeProject(Id $id): void
     {
         $this->projectRepository->remove($id);
     }
@@ -226,7 +227,7 @@ class AccessControlManager
         return $organization;
     }
 
-    public function editOrganization($id, Name $name): Organization
+    public function editOrganization(Id $id, Name $name): Organization
     {
         $organization = $this->organizationRepository->findById($id);
 
@@ -236,7 +237,7 @@ class AccessControlManager
         return $organization;
     }
 
-    public function removeOrganization($id): void
+    public function removeOrganization(Id $id): void
     {
         $this->organizationRepository->remove($id);
     }
@@ -246,7 +247,7 @@ class AccessControlManager
         $this->ACESynchronizer->synchronizeACEGlobally();
     }
 
-    public function synchronizeACEForUser($userId): void
+    public function synchronizeACEForUser(Id $userId): void
     {
         $this->ACESynchronizer->synchronizeACEForUser($userId);
     }

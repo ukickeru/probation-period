@@ -26,19 +26,19 @@ class AccessControlManagerTest extends KernelTestCase
 
     private ?EntityManagerInterface $entityManager;
 
-    private AccessControlManager $accessControlManager;
+    private ?AccessControlManager $accessControlManager;
 
-    private UserRepository $userRepository;
+    private ?UserRepository $userRepository;
 
-    private GroupRepository $groupRepository;
+    private ?GroupRepository $groupRepository;
 
-    private ResourceRepository $resourceRepository;
+    private ?ResourceRepository $resourceRepository;
 
-    private OrganizationRepository $organizationRepository;
+    private ?OrganizationRepository $organizationRepository;
 
-    private ProjectRepository $projectRepository;
+    private ?ProjectRepository $projectRepository;
 
-    private ACERepository $ACERepository;
+    private ?ACERepository $ACERepository;
 
     protected function setUp(): void
     {
@@ -218,7 +218,7 @@ class AccessControlManagerTest extends KernelTestCase
             $this->groupRepository->findById($groupId);
         } catch (\DomainException $exception) {
             $this->assertEquals(
-                Group::class.' with ID "'.$userId.'" was not found!',
+                Group::class.' with ID "'.$groupId.'" was not found!',
                 $exception->getMessage()
             );
         }
@@ -329,5 +329,12 @@ class AccessControlManagerTest extends KernelTestCase
         $this->dropSchema($this->entityManager);
         $this->entityManager->close();
         $this->entityManager = null;
+        $this->accessControlManager = null;
+        $this->userRepository = null;
+        $this->groupRepository = null;
+        $this->resourceRepository = null;
+        $this->organizationRepository = null;
+        $this->projectRepository = null;
+        $this->ACERepository = null;
     }
 }

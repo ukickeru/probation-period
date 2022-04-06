@@ -4,6 +4,7 @@ namespace Mygento\AccessControlBundle\Tests\Functional\ACL\Repository;
 
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Mygento\AccessControlBundle\ACL\Domain\Entity\ACE;
+use Mygento\AccessControlBundle\ACL\Domain\Service\ACEsCollection;
 use Mygento\AccessControlBundle\ACL\Repository\ACERepository;
 use Mygento\AccessControlBundle\Core\Domain\Entity\Resource;
 use Mygento\AccessControlBundle\Core\Domain\Entity\User;
@@ -58,7 +59,22 @@ class ACERepositoryTest extends BaseRepositoryTestCase
 
         $availableResourcesId = $this->repository->getResourcesIdAvailableForUser($user->getId());
 
-        $this->assertEquals([1, 2, 3], $availableResourcesId);
+        $this->assertEquals(
+            [
+                $resource1->getId()->value(),
+                $resource2->getId()->value(),
+                $resource3->getId()->value(),
+            ],
+            $availableResourcesId
+        );
+    }
+
+    public function testCheckSynchronizeGlobally()
+    {
+        // Check that nothing will happen if we pass an empty collection
+        $ACEs = new ACEsCollection();
+        $this->repository->updateACLGlobally($ACEs);
+        $this->assertTrue(true);
     }
 
     public function testCascadeOperations()
@@ -78,8 +94,8 @@ class ACERepositoryTest extends BaseRepositoryTestCase
         $this->repository->save($ACE);
 
         // Save entities ids
-        $userId = $user->getId();
-        $resourceId = $resource->getId();
+        $userId = clone $user->getId();
+        $resourceId = clone $resource->getId();
 
         // Check that user was successfully removed
         $this->entityManager->remove($user);

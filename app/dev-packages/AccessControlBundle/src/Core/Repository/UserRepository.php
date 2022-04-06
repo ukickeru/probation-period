@@ -6,6 +6,7 @@ use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use Mygento\AccessControlBundle\Core\Domain\Entity\User;
 use Mygento\AccessControlBundle\Core\Domain\Service\AccessControlCheckerInterface;
+use Mygento\AccessControlBundle\Core\Domain\ValueObject\Id;
 
 /**
  * @method User|null find($id, $lockMode = null, $lockVersion = null)
@@ -29,9 +30,9 @@ class UserRepository extends ServiceEntityRepository implements AccessControlChe
     public function getAllUsersId(): array
     {
         $connection = $this->_em->getConnection();
-        $sql = 'SELECT DISTINCT u.id
+        $sql = 'SELECT DISTINCT u.id_value
                 FROM "user" u
-                ORDER BY u.id';
+                ORDER BY u.id_value';
 
         return $connection
             ->prepare($sql)
@@ -40,45 +41,24 @@ class UserRepository extends ServiceEntityRepository implements AccessControlChe
     }
 
     /**
-     * Returns array of resources ids, available for specified user.
-     */
-    public function getResourcesIdAvailableForUser($userId): array
-    {
-        $connection = $this->_em->getConnection();
-        $sql = 'SELECT DISTINCT r.id
-                FROM resource r
-                JOIN group_resource gr on r.id = gr.resource_id
-                JOIN "group" g on g.id = gr.group_id
-                JOIN group_user gu on g.id = gu.group_id
-                JOIN "user" u on u.id = gu.user_id
-                WHERE u.id = ?
-                ORDER BY r.id';
-
-        return $connection
-            ->prepare($sql)
-            ->executeQuery([$userId])
-            ->fetchFirstColumn();
-    }
-
-    /**
      * Checks if specified user has access to specified resource.
      */
-    public function isResourceAvailableForUser($userId, $resourceId): bool
+    public function isResourceAvailableForUser(Id $userId, Id $resourceId): bool
     {
         try {
             $connection = $this->_em->getConnection();
-            $sql = 'SELECT DISTINCT r.id
+            $sql = 'SELECT DISTINCT r.id_value
                 FROM resource r
-                JOIN group_resource gr on r.id = gr.resource_id
-                JOIN "group" g on g.id = gr.group_id
-                JOIN group_user gu on g.id = gu.group_id
-                JOIN "user" u on u.id = gu.user_id
-                WHERE u.id = ? AND r.id = ?
-                ORDER BY r.id';
+                JOIN group_resource gr on r.id_value = gr.resource_id
+                JOIN "group" g on g.id_value = gr.group_id
+                JOIN group_user gu on g.id_value = gu.group_id
+                JOIN "user" u on u.id_value = gu.user_id
+                WHERE u.id_value = ? AND r.id_value = ?
+                ORDER BY r.id_value';
 
             $ace = $connection
                 ->prepare($sql)
-                ->executeQuery([$userId, $resourceId])
+                ->executeQuery([$userId->value(), $resourceId->value()])
                 ->fetchFirstColumn();
         } catch (\Throwable $throwable) {
             return false;
@@ -89,5 +69,43 @@ class UserRepository extends ServiceEntityRepository implements AccessControlChe
         }
 
         return true;
+    }
+
+    /**
+     * Returns array of resources ids, available for specified user.
+     */
+    public function getResourcesIdAvailableForUser(Id $userId): array
+    {
+        $connection = $this->_em->getConnection();
+        $sql = 'SELECT DISTINCT r.id_value
+                FROM resource r
+                JOIN group_resource gr on r.id_value = gr.resource_id
+                JOIN "group" g on g.id_value = gr.group_id
+                JOIN group_user gu on g.id_value = gu.group_id
+                JOIN "user" u on u.id_value = gu.user_id
+                WHERE u.id_value = ?
+                ORDER BY r.id_value';
+
+        return $connection
+            ->prepare($sql)
+            ->executeQuery([$userId->value()])
+            ->fetchFirstColumn();
+    }
+
+    public function getACL()
+    {
+        $connection = $this->_em->getConnection();
+        $sql = 'SELECT DISTINCT u.id_value, r.id_value
+                FROM resource r
+                JOIN group_resource gr on r.id_value = gr.resource_id
+                JOIN "group" g on g.id_value = gr.group_id
+                JOIN group_user gu on g.id_value = gu.group_id
+                JOIN "user" u on u.id_value = gu.user_id
+                ORDER BY u.id_value, r.id_value';
+
+        return $connection
+            ->prepare($sql)
+            ->executeQuery()
+            ->fetchAllNumeric();
     }
 }

@@ -5,6 +5,7 @@ namespace Mygento\AccessControlBundle\Core\Repository;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use Mygento\AccessControlBundle\Core\Domain\Entity\Group;
+use Mygento\AccessControlBundle\Core\Domain\ValueObject\Id;
 
 /**
  * @method Group|null find($id, $lockMode = null, $lockVersion = null)
@@ -28,40 +29,40 @@ class GroupRepository extends ServiceEntityRepository
     /**
      * Returns array of resources ids, available for specified user.
      */
-    public function getAllGroupUsersId($groupId): array
+    public function getAllGroupUsersId(Id $groupId): array
     {
         $connection = $this->_em->getConnection();
 
-        $sql = 'SELECT DISTINCT u.id
+        $sql = 'SELECT DISTINCT u.id_value
                 FROM "group" g
-                JOIN group_user gu on g.id = gu.group_id
-                JOIN "user" u on u.id = gu.user_id
-                WHERE g.id = ?
-                ORDER BY u.id';
+                JOIN group_user gu on g.id_value = gu.group_id
+                JOIN "user" u on u.id_value = gu.user_id
+                WHERE g.id_value = ?
+                ORDER BY u.id_value';
 
         return $connection
             ->prepare($sql)
-            ->executeQuery([$groupId])
+            ->executeQuery([$groupId->value()])
             ->fetchFirstColumn();
     }
 
     /**
      * Returns array of resources ids, available for specified user.
      */
-    public function getAllGroupResourcesId($groupId): array
+    public function getAllGroupResourcesId(Id $groupId): array
     {
         $connection = $this->_em->getConnection();
 
-        $sql = 'SELECT DISTINCT r.id
+        $sql = 'SELECT DISTINCT r.id_value
                 FROM "group" g
-                JOIN group_resource gr on g.id = gr.group_id
-                JOIN resource r on r.id = gr.resource_id
-                WHERE g.id = ?
-                ORDER BY r.id';
+                JOIN group_resource gr on g.id_value = gr.group_id
+                JOIN resource r on r.id_value = gr.resource_id
+                WHERE g.id_value = ?
+                ORDER BY r.id_value';
 
         return $connection
             ->prepare($sql)
-            ->executeQuery([$groupId])
+            ->executeQuery([$groupId->value()])
             ->fetchFirstColumn();
     }
 }

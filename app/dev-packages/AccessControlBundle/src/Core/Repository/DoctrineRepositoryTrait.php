@@ -3,6 +3,7 @@
 namespace Mygento\AccessControlBundle\Core\Repository;
 
 use Doctrine\ORM\ORMException;
+use Mygento\AccessControlBundle\Core\Domain\ValueObject\Id;
 
 /**
  * Trait DoctrineRepositoryTrait is intended to shorten code that uses built-in doctrine mechanisms.
@@ -10,19 +11,13 @@ use Doctrine\ORM\ORMException;
 trait DoctrineRepositoryTrait
 {
     /**
-     * @param scalar $id Unified entity identifier
+     * @param Id $id Unified entity identifier
      *
      * @return object Found entity object
-     *
-     * @throws \DomainException in case of entity was not found or $id is not a scalar
      */
-    public function findById($id): object
+    public function findById(Id $id): object
     {
-        if (!is_scalar($id)) {
-            throw new \DomainException('Id must be represent by positive integer value!');
-        }
-
-        $user = $this->findOneBy(['id' => $id]);
+        $user = $this->findOneBy(['id.value' => $id->value()]);
 
         if (null === $user) {
             throw new \DomainException($this->_entityName.' with ID "'.$id.'" was not found!');
@@ -62,23 +57,19 @@ trait DoctrineRepositoryTrait
     }
 
     /**
-     * @param object $entityOrId Entity object or it's id to remove
+     * @param Id|object $entityOrId Entity object or it's id
      *
      * @throws \DomainException in case of entity class was not match for declared or $id is not a scalar
      * @throws ORMException     in case of entity was not found
      */
     public function remove($entityOrId): void
     {
-        if (!is_scalar($entityOrId) && !($entityOrId instanceof $this->_entityName)) {
-            if (is_object($entityOrId) && !($entityOrId instanceof $this->_entityName)) {
-                throw new \DomainException(self::class.' works only with "'.$this->_entityName.'" objects!');
-            } else {
-                throw new \DomainException('Id must be represent by positive integer value!');
-            }
+        if (!($entityOrId instanceof Id) && !($entityOrId instanceof $this->_entityName)) {
+            throw new \DomainException(self::class.' works only with "'.$this->_entityName.'" objects!');
         }
 
-        if (is_scalar($entityOrId)) {
-            $entityOrId = $this->_em->getReference($this->_entityName, $entityOrId);
+        if ($entityOrId instanceof Id) {
+            $entityOrId = $this->_em->getReference($this->_entityName, $entityOrId->value());
         }
 
         $this->_em->remove($entityOrId);

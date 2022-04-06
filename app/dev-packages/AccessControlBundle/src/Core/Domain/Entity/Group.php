@@ -5,6 +5,7 @@ namespace Mygento\AccessControlBundle\Core\Domain\Entity;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Mygento\AccessControlBundle\Core\Domain\ValueObject\Id;
 use Mygento\AccessControlBundle\Core\Domain\ValueObject\Name;
 use Mygento\AccessControlBundle\Core\Repository\GroupRepository;
 
@@ -16,10 +17,9 @@ class Group
 {
     /**
      * @ORM\Id()
-     * @ORM\GeneratedValue()
-     * @ORM\Column(type="integer")
+     * @ORM\Embedded(class=Id::class)
      */
-    private $id;
+    private ?Id $id;
 
     /**
      * @ORM\Embedded(class=Name::class, columnPrefix="")
@@ -28,37 +28,41 @@ class Group
 
     /**
      * @ORM\ManyToMany(targetEntity=User::class, inversedBy="groups", cascade={"persist"})
+     * @ORM\JoinTable(name="group_user",
+     *      joinColumns={@ORM\JoinColumn(name="group_id", referencedColumnName="id_value")},
+     *      inverseJoinColumns={@ORM\JoinColumn(name="user_id", referencedColumnName="id_value")}
+     * )
      */
     private $users;
 
     /**
      * @ORM\ManyToMany(targetEntity=Resource::class, inversedBy="groups", cascade={"persist"})
+     * @ORM\JoinTable(name="group_resource",
+     *      joinColumns={@ORM\JoinColumn(name="group_id", referencedColumnName="id_value")},
+     *      inverseJoinColumns={@ORM\JoinColumn(name="resource_id", referencedColumnName="id_value")}
+     * )
      */
     private $resources;
 
     public function __construct(
         Name $name,
-        iterable $users = null,
-        iterable $resources = null
+        iterable $users = [],
+        iterable $resources = []
     ) {
         $this->name = $name;
 
         $this->users = new ArrayCollection();
-        if (null !== $users) {
-            foreach ($users as $user) {
-                $this->addUser($user);
-            }
+        foreach ($users as $user) {
+            $this->addUser($user);
         }
 
         $this->resources = new ArrayCollection();
-        if (null !== $resources) {
-            foreach ($resources as $resource) {
-                $this->addResource($resource);
-            }
+        foreach ($resources as $resource) {
+            $this->addResource($resource);
         }
     }
 
-    public function getId()
+    public function getId(): ?Id
     {
         return $this->id;
     }

@@ -8,6 +8,7 @@ use Doctrine\Persistence\ManagerRegistry;
 use Mygento\AccessControlBundle\ACL\Domain\Entity\ACE;
 use Mygento\AccessControlBundle\ACL\Domain\Service\ACEsCollection;
 use Mygento\AccessControlBundle\Core\Domain\Service\AccessControlCheckerInterface;
+use Mygento\AccessControlBundle\Core\Domain\ValueObject\Id;
 use Mygento\AccessControlBundle\Core\Repository\DoctrineRepositoryTrait;
 use Mygento\AccessControlBundle\Core\Repository\GroupRepository;
 use Mygento\AccessControlBundle\Core\Repository\UserRepository;
@@ -41,20 +42,14 @@ class ACERepository extends ServiceEntityRepository implements AccessControlChec
     }
 
     /**
-     * @param scalar $userId     User entity identifier
-     * @param scalar $resourceId Resource entity identifier
+     * @param Id $userId     User entity identifier
+     * @param Id $resourceId Resource entity identifier
      *
      * @return ACE Found entity object
-     *
-     * @throws \DomainException in case of entity was not found or one of ids is not a scalar
      */
-    public function findById($userId, $resourceId): object
+    public function findById(Id $userId, Id $resourceId): object
     {
-        if (!is_scalar($userId) || !is_scalar($resourceId)) {
-            throw new \DomainException('Id must be represent by positive integer value!');
-        }
-
-        $user = $this->findOneBy(['user' => $userId, 'resource' => $resourceId]);
+        $user = $this->findOneBy(['user' => $userId->value(), 'resource' => $resourceId->value()]);
 
         if (null === $user) {
             throw new \DomainException($this->_entityName.' with user ID "'.$userId.'" and resource ID "'.$resourceId.'" was not found!');
@@ -63,22 +58,22 @@ class ACERepository extends ServiceEntityRepository implements AccessControlChec
         return $user;
     }
 
-    public function isResourceAvailableForUser($userId, $resourceId): bool
+    public function isResourceAvailableForUser(Id $userId, Id $resourceId): bool
     {
         $connection = $this->_em->getConnection();
 
         $sql = 'SELECT ace.resource_id FROM ace WHERE ace.user_id = ? AND ace.resource_id = ?';
 
-        return 1 === $connection->prepare($sql)->executeQuery([$userId, $resourceId])->rowCount();
+        return 1 === $connection->prepare($sql)->executeQuery([$userId->value(), $resourceId->value()])->rowCount();
     }
 
-    public function getResourcesIdAvailableForUser($userId): array
+    public function getResourcesIdAvailableForUser(Id $userId): array
     {
         $connection = $this->_em->getConnection();
 
         $sql = 'SELECT ace.resource_id FROM ace WHERE ace.user_id = ?';
 
-        return $connection->prepare($sql)->executeQuery([$userId])->fetchFirstColumn();
+        return $connection->prepare($sql)->executeQuery([$userId->value()])->fetchFirstColumn();
     }
 
     public function updateACEs(
@@ -127,5 +122,37 @@ class ACERepository extends ServiceEntityRepository implements AccessControlChec
         $sql = 'DELETE FROM ace WHERE (ace.user_id, ace.resource_id) IN ('.$ACEs.')';
 
         $connection->prepare($sql)->executeQuery();
+    }
+
+    public function updateACLGlobally(ACEsCollection $ACEs): void
+    {
+        if (0 === count($ACEs)) {
+            return;
+        }
+
+        $connection = $this->_em->getConnection();
+        $connection->setTransactionIsolation(TransactionIsolationLevel::SERIALIZABLE);
+
+        $connection->beginTransaction();
+        try {
+            $sql = 'DELETE FROM ace';
+            $connection->prepare($sql)->executeQuery();
+
+            $connection->beginTransaction();
+            try {
+                $sql = 'INSERT INTO ace VALUES '.$ACEs;
+                $connection->prepare($sql)->executeQuery();
+
+                $connection->commit();
+            } catch (\Throwable $exception) {
+                $connection->rollBack();
+                throw new \Exception('Can not insert access control entries.', $exception->getCode(), $exception);
+            }
+
+            $connection->commit();
+        } catch (\Throwable $exception) {
+            $connection->rollBack();
+            throw new \Exception('Can not clear access control entries table.', $exception->getPrevious()->getCode(), $exception);
+        }
     }
 }

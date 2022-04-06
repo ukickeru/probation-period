@@ -5,7 +5,7 @@ namespace Mygento\AccessControlBundle\Core\Domain\Entity;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
-use Mygento\AccessControlBundle\Core\Domain\ValueObject\Name;
+use Mygento\AccessControlBundle\Core\Domain\ValueObject\Id;
 use Mygento\AccessControlBundle\Core\Repository\ResourceRepository;
 
 /**
@@ -15,10 +15,9 @@ class Resource
 {
     /**
      * @ORM\Id()
-     * @ORM\GeneratedValue()
-     * @ORM\Column(type="integer")
+     * @ORM\Embedded(class=Id::class)
      */
-    private $id;
+    private ?id $id;
 
     /**
      * @ORM\ManyToMany(targetEntity=Group::class, mappedBy="resources")
@@ -27,13 +26,13 @@ class Resource
 
     /**
      * @ORM\ManyToOne(targetEntity=Organization::class, inversedBy="resources")
-     * @ORM\JoinColumn(name="organization_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
+     * @ORM\JoinColumn(name="organization_id", referencedColumnName="id_value", nullable=true, onDelete="SET NULL")
      */
     private ?Organization $organization;
 
     /**
      * @ORM\ManyToOne(targetEntity=Project::class, inversedBy="resources")
-     * @ORM\JoinColumn(name="project_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
+     * @ORM\JoinColumn(name="project_id", referencedColumnName="id_value", nullable=true, onDelete="SET NULL")
      */
     private ?Project $project;
 
@@ -51,7 +50,7 @@ class Resource
         $this->project = $project;
     }
 
-    public function getId()
+    public function getId(): ?Id
     {
         return $this->id;
     }

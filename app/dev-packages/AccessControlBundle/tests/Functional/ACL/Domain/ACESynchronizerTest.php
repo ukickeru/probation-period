@@ -75,9 +75,9 @@ class ACESynchronizerTest extends KernelTestCase
         $this->entityManager->flush();
 
         $expectedResourcesIdAvailableForUser = [
-            $resource1->getId(),
-            $resource2->getId(),
-            $resource3->getId(),
+            $resource1->getId()->value(),
+            $resource2->getId()->value(),
+            $resource3->getId()->value(),
         ];
 
         // Checks if there are 3 resources ids, available for user from User-Group-Resource model
@@ -108,7 +108,7 @@ class ACESynchronizerTest extends KernelTestCase
             $this->ACERepository->getResourcesIdAvailableForUser($user->getId())
         );
 
-        $expectedResourcesIdAvailableForUser[] = $resource4->getId();
+        $expectedResourcesIdAvailableForUser[] = $resource4->getId()->value();
 
         // Checks if now there are 4 resources ids, available for user from ACL model
         $this->assertEquals(
@@ -196,13 +196,25 @@ class ACESynchronizerTest extends KernelTestCase
         $this->entityManager->flush();
 
         // User 1 has access to resources 1 & 2
-        $this->assertEquals([$resource1->getId(), $resource2->getId()], $this->userRepository->getResourcesIdAvailableForUser($user1->getId()));
+        $this->assertEquals(
+            [
+                $resource1->getId()->value(),
+                $resource2->getId()->value(),
+            ],
+            $this->userRepository->getResourcesIdAvailableForUser($user1->getId())
+        );
 
         // User 2 has access to resources 2 & 3
-        $this->assertEquals([$resource2->getId(), $resource3->getId()], $this->userRepository->getResourcesIdAvailableForUser($user2->getId()));
+        $this->assertEquals(
+            [
+                $resource2->getId()->value(),
+                $resource3->getId()->value(),
+            ],
+            $this->userRepository->getResourcesIdAvailableForUser($user2->getId())
+        );
 
         // User 3 has access to resource 4
-        $this->assertEquals([$resource4->getId()], $this->userRepository->getResourcesIdAvailableForUser($user3->getId()));
+        $this->assertEquals([$resource4->getId()->value()], $this->userRepository->getResourcesIdAvailableForUser($user3->getId()));
 
         // None of these users have access to the resources in the ACL model
         $this->assertEmpty($this->ACERepository->getResourcesIdAvailableForUser($user1->getId()));
@@ -212,9 +224,21 @@ class ACESynchronizerTest extends KernelTestCase
         $this->ACESynchronizer->synchronizeACEGlobally();
 
         // Now they have access
-        $this->assertEquals([$resource1->getId(), $resource2->getId()], $this->ACERepository->getResourcesIdAvailableForUser($user1->getId()));
-        $this->assertEquals([$resource2->getId(), $resource3->getId()], $this->ACERepository->getResourcesIdAvailableForUser($user2->getId()));
-        $this->assertEquals([$resource4->getId()], $this->ACERepository->getResourcesIdAvailableForUser($user3->getId()));
+        $this->assertEquals(
+            [
+                $resource1->getId()->value(),
+                $resource2->getId()->value(),
+            ],
+            $this->ACERepository->getResourcesIdAvailableForUser($user1->getId())
+        );
+        $this->assertEquals(
+            [
+                $resource2->getId()->value(),
+                $resource3->getId()->value(),
+            ],
+            $this->ACERepository->getResourcesIdAvailableForUser($user2->getId())
+        );
+        $this->assertEquals([$resource4->getId()->value()], $this->ACERepository->getResourcesIdAvailableForUser($user3->getId()));
 
         // Now lets remove access to resource 2 from group 2
         $group2->removeResource($resource2);
@@ -225,12 +249,24 @@ class ACESynchronizerTest extends KernelTestCase
         $this->ACESynchronizer->synchronizeACEGlobally();
 
         // User 1 have no more access to this resource
-        $this->assertEquals([$resource1->getId()], $this->userRepository->getResourcesIdAvailableForUser($user1->getId()));
-        $this->assertEquals([$resource1->getId()], $this->ACERepository->getResourcesIdAvailableForUser($user1->getId()));
+        $this->assertEquals([$resource1->getId()->value()], $this->userRepository->getResourcesIdAvailableForUser($user1->getId()));
+        $this->assertEquals([$resource1->getId()->value()], $this->ACERepository->getResourcesIdAvailableForUser($user1->getId()));
 
         // But user 2 still may access it, through group 3
-        $this->assertEquals([$resource2->getId(), $resource3->getId()], $this->userRepository->getResourcesIdAvailableForUser($user2->getId()));
-        $this->assertEquals([$resource2->getId(), $resource3->getId()], $this->ACERepository->getResourcesIdAvailableForUser($user2->getId()));
+        $this->assertEquals(
+            [
+                $resource2->getId()->value(),
+                $resource3->getId()->value(),
+            ],
+            $this->userRepository->getResourcesIdAvailableForUser($user2->getId())
+        );
+        $this->assertEquals(
+            [
+                $resource2->getId()->value(),
+                $resource3->getId()->value(),
+            ],
+            $this->ACERepository->getResourcesIdAvailableForUser($user2->getId())
+        );
     }
 
     protected function tearDown(): void
