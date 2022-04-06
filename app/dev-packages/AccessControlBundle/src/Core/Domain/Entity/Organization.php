@@ -26,13 +26,13 @@ class Organization
     protected Name $name;
 
     /**
-     * @ORM\OneToOne(targetEntity=Group::class, cascade={"persist", "remove"})
+     * @ORM\OneToOne(targetEntity=Group::class, cascade={"persist"})
      * @ORM\JoinColumn(name="group_id", referencedColumnName="id", nullable=false, onDelete="CASCADE")
      */
     protected Group $group;
 
     /**
-     * @ORM\OneToMany(targetEntity=Resource::class, mappedBy="organization")
+     * @ORM\OneToMany(targetEntity=Resource::class, mappedBy="organization", cascade={"persist"})
      */
     protected $resources;
 

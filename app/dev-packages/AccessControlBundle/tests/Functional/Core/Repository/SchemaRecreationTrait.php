@@ -15,4 +15,11 @@ trait SchemaRecreationTrait
         $schemaTool->dropSchema($metadata);
         $schemaTool->createSchema($metadata);
     }
+
+    public function dropSchema(EntityManagerInterface $entityManager)
+    {
+        $schemaTool = new SchemaTool($this->entityManager);
+        $metadata = $this->entityManager->getMetadataFactory()->getAllMetadata();
+        $schemaTool->dropSchema($metadata);
+    }
 }

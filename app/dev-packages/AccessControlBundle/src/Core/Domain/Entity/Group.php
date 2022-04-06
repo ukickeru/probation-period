@@ -27,12 +27,12 @@ class Group
     protected Name $name;
 
     /**
-     * @ORM\ManyToMany(targetEntity=User::class, inversedBy="groups")
+     * @ORM\ManyToMany(targetEntity=User::class, inversedBy="groups", cascade={"persist"})
      */
     private $users;
 
     /**
-     * @ORM\ManyToMany(targetEntity=Resource::class, inversedBy="groups")
+     * @ORM\ManyToMany(targetEntity=Resource::class, inversedBy="groups", cascade={"persist"})
      */
     private $resources;
 

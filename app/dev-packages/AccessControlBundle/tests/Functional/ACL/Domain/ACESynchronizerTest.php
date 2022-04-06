@@ -237,6 +237,7 @@ class ACESynchronizerTest extends KernelTestCase
     {
         parent::tearDown();
         // to avoid memory leaks
+        $this->dropSchema($this->entityManager);
         $this->entityManager->close();
         $this->entityManager = null;
         $this->ACERepository = null;

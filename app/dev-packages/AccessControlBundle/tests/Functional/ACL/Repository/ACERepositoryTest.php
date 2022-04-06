@@ -61,6 +61,46 @@ class ACERepositoryTest extends BaseRepositoryTestCase
         $this->assertEquals([1, 2, 3], $availableResourcesId);
     }
 
+    public function testCascadeOperations()
+    {
+        $name = new Name('Example');
+
+        $user = new User($name);
+        $this->entityManager->persist($user);
+
+        $resource = new Resource();
+        $this->entityManager->persist($resource);
+
+        $this->entityManager->flush();
+
+        // Create and save new ACE
+        $ACE = new ACE($user, $resource);
+        $this->repository->save($ACE);
+
+        // Save entities ids
+        $userId = $user->getId();
+        $resourceId = $resource->getId();
+
+        // Check that user was successfully removed
+        $this->entityManager->remove($user);
+        $this->entityManager->flush();
+        $this->entityManager->clear();
+
+        // Check that ACE related to user, also have been persisted (by cascade)
+        try {
+            $this->repository->findById($userId, $resourceId);
+        } catch (\DomainException $exception) {
+            $this->assertEquals(
+                ACE::class.' with user ID "'.$userId.'" and resource ID "'.$resourceId.'" was not found!',
+                $exception->getMessage()
+            );
+        }
+
+        // Check that resource still in database
+        $resource = $this->entityManager->find(Resource::class, $resourceId);
+        $this->assertInstanceOf(Resource::class, $resource);
+    }
+
     protected function getEntityFQCN(): string
     {
         return ACE::class;

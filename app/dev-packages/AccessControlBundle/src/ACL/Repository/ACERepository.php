@@ -17,7 +17,6 @@ use Mygento\AccessControlBundle\Core\Repository\UserRepository;
  * @method ACE|null findOneBy(array $criteria, array $orderBy = null)
  * @method ACE[]    findAll()
  * @method ACE[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
- * @method ACE      findById($id)
  * @method void     save(object $object)
  * @method void     update(object $object)
  * @method void     remove($entityOrId)
@@ -39,6 +38,29 @@ class ACERepository extends ServiceEntityRepository implements AccessControlChec
 
         $this->userRepository = $userRepository;
         $this->groupRepository = $groupRepository;
+    }
+
+    /**
+     * @param scalar $userId     User entity identifier
+     * @param scalar $resourceId Resource entity identifier
+     *
+     * @return ACE Found entity object
+     *
+     * @throws \DomainException in case of entity was not found or one of ids is not a scalar
+     */
+    public function findById($userId, $resourceId): object
+    {
+        if (!is_scalar($userId) || !is_scalar($resourceId)) {
+            throw new \DomainException('Id must be represent by positive integer value!');
+        }
+
+        $user = $this->findOneBy(['user' => $userId, 'resource' => $resourceId]);
+
+        if (null === $user) {
+            throw new \DomainException($this->_entityName.' with user ID "'.$userId.'" and resource ID "'.$resourceId.'" was not found!');
+        }
+
+        return $user;
     }
 
     public function isResourceAvailableForUser($userId, $resourceId): bool

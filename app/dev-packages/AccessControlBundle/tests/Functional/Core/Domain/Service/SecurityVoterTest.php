@@ -10,10 +10,13 @@ use Mygento\AccessControlBundle\Core\Domain\Entity\User;
 use Mygento\AccessControlBundle\Core\Domain\Exception\AccessDeniedException;
 use Mygento\AccessControlBundle\Core\Domain\Service\SecurityVoter;
 use Mygento\AccessControlBundle\Core\Domain\ValueObject\Name;
+use Mygento\AccessControlBundle\Tests\Functional\Core\Repository\SchemaRecreationTrait;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
 class SecurityVoterTest extends KernelTestCase
 {
+    use SchemaRecreationTrait;
+
     private ?EntityManagerInterface $entityManager;
 
     private ?SecurityVoter $securityVoter;
@@ -33,6 +36,8 @@ class SecurityVoterTest extends KernelTestCase
 
         $this->ACESynchronizer = $kernel->getContainer()
             ->get('mygento.access_control.ace_synchronizer');
+
+        $this->recreateSchema($this->entityManager);
     }
 
     public function testAccessControl()
@@ -75,7 +80,7 @@ class SecurityVoterTest extends KernelTestCase
     protected function tearDown(): void
     {
         parent::tearDown();
-
+        $this->dropSchema($this->entityManager);
         $this->entityManager->close();
         $this->entityManager = null;
         $this->securityVoter = null;

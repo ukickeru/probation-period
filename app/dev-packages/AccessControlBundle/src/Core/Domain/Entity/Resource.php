@@ -27,13 +27,13 @@ class Resource
 
     /**
      * @ORM\ManyToOne(targetEntity=Organization::class, inversedBy="resources")
-     * @ORM\JoinColumn(name="organization_id", referencedColumnName="id", nullable=true)
+     * @ORM\JoinColumn(name="organization_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
      */
     private ?Organization $organization;
 
     /**
      * @ORM\ManyToOne(targetEntity=Project::class, inversedBy="resources")
-     * @ORM\JoinColumn(name="project_id", referencedColumnName="id", nullable=true)
+     * @ORM\JoinColumn(name="project_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
      */
     private ?Project $project;
 

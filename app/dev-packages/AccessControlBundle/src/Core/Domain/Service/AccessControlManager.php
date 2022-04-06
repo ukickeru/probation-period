@@ -54,7 +54,10 @@ class AccessControlManager
         return $this->securityVoter->isGranted($resourceId, $userId);
     }
 
-    public function createUser(Name $name, array $groups): User
+    // todo: составить метод для проверки ACL по классификационным признакам (id организации, проекта и т.д. и т.п.)
+    // public function isGrantedByClassificationSigns(ClassificationSignInterface ...$classificationSigns)
+
+    public function createUser(Name $name, array $groups = []): User
     {
         $user = new User($name, $groups);
 
@@ -65,7 +68,7 @@ class AccessControlManager
         return $user;
     }
 
-    public function editUser($id, Name $name, array $groups): User
+    public function editUser($id, Name $name, array $groups = []): User
     {
         $user = $this->userRepository->findById($id);
 
@@ -95,7 +98,7 @@ class AccessControlManager
         $this->userRepository->remove($id);
     }
 
-    public function createGroup(Name $name, iterable $users, iterable $groups): Group
+    public function createGroup(Name $name, array $users = [], array $groups = []): Group
     {
         $group = new Group($name, $users, $groups);
 
@@ -106,7 +109,7 @@ class AccessControlManager
         return $group;
     }
 
-    public function editGroup($id, Name $name, array $users, array $resources): Group
+    public function editGroup($id, Name $name, array $users = [], array $resources = []): Group
     {
         $group = $this->groupRepository->findById($id);
 
@@ -148,7 +151,7 @@ class AccessControlManager
         $this->groupRepository->remove($id);
     }
 
-    public function createResource(Organization $organization, Project $project, array $groups): Resource
+    public function createResource(array $groups = [], ?Organization $organization = null, ?Project $project = null): Resource
     {
         $resource = new Resource($groups, $organization, $project);
 
@@ -159,7 +162,7 @@ class AccessControlManager
         return $resource;
     }
 
-    public function editResource($id, array $groups): Resource
+    public function editResource($id, array $groups = []): Resource
     {
         $resource = $this->resourceRepository->findById($id);
 

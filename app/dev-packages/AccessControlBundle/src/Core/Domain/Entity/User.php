@@ -27,7 +27,7 @@ class User
     protected Name $name;
 
     /**
-     * @ORM\ManyToMany(targetEntity=Group::class, mappedBy="users")
+     * @ORM\ManyToMany(targetEntity=Group::class, mappedBy="users", cascade={"persist"})
      */
     private $groups;
 

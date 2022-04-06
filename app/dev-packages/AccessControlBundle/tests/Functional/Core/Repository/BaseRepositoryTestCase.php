@@ -31,6 +31,7 @@ abstract class BaseRepositoryTestCase extends KernelTestCase
     {
         parent::tearDown();
         // to avoid memory leaks
+        $this->dropSchema($this->entityManager);
         $this->entityManager->close();
         $this->entityManager = null;
         $this->repository = null;
