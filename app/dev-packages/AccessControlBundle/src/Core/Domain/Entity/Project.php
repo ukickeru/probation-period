@@ -23,7 +23,7 @@ class Project
     /**
      * @ORM\Embedded(class=Name::class)
      */
-    protected Name $name;
+    private Name $name;
 
     /**
      * @ORM\OneToOne(targetEntity=Group::class, cascade={"persist"})

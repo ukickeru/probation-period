@@ -18,23 +18,23 @@ class Organization
      * @ORM\Id()
      * @ORM\Embedded(class=Id::class)
      */
-    protected ?Id $id;
+    private ?Id $id;
 
     /**
      * @ORM\Embedded(class=Name::class)
      */
-    protected Name $name;
+    private Name $name;
 
     /**
      * @ORM\OneToOne(targetEntity=Group::class, cascade={"persist"})
      * @ORM\JoinColumn(name="group_id", referencedColumnName="id_value", nullable=false, onDelete="CASCADE")
      */
-    protected Group $group;
+    private Group $group;
 
     /**
      * @ORM\OneToMany(targetEntity=Resource::class, mappedBy="organization", cascade={"persist"})
      */
-    protected $resources;
+    private $resources;
 
     public function __construct(
         Name $name,

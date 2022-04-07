@@ -10,24 +10,28 @@ use Mygento\AccessControlBundle\Core\Domain\ValueObject\Name;
 use Mygento\AccessControlBundle\Core\Repository\UserRepository;
 
 /**
- * @ORM\Entity(repositoryClass=UserRepository::class)
- * @ORM\Table(name="`user`")
+ * @ORM\MappedSuperclass(repositoryClass=UserRepository::class)
  */
 class User
 {
     /**
      * @ORM\Id()
-     * @ORM\Embedded(class=Id::class)
+     * @ORM\GeneratedValue()
+     * @ORM\Column(name="id_value", type="integer")
      */
-    private ?Id $id;
+    private $id;
 
     /**
-     * @ORM\Embedded(class=Name::class, columnPrefix="")
+     * @ORM\Embedded(class=Name::class)
      */
     protected Name $name;
 
     /**
-     * @ORM\ManyToMany(targetEntity=Group::class, mappedBy="users", cascade={"persist"})
+     * @ORM\ManyToMany(targetEntity=Group::class, inversedBy="users", cascade={"persist"})
+     * @ORM\JoinTable(name="group_user",
+     *      joinColumns={@ORM\JoinColumn(name="user_id", referencedColumnName="id_value")},
+     *      inverseJoinColumns={@ORM\JoinColumn(name="group_id", referencedColumnName="id_value")},
+     * )
      */
     private $groups;
 
@@ -45,7 +49,7 @@ class User
 
     public function getId(): ?Id
     {
-        return $this->id;
+        return new Id($this->id);
     }
 
     public function getName(): Name

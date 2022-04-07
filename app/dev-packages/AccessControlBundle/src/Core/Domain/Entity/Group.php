@@ -22,16 +22,12 @@ class Group
     private ?Id $id;
 
     /**
-     * @ORM\Embedded(class=Name::class, columnPrefix="")
+     * @ORM\Embedded(class=Name::class)
      */
-    protected Name $name;
+    private Name $name;
 
     /**
-     * @ORM\ManyToMany(targetEntity=User::class, inversedBy="groups", cascade={"persist"})
-     * @ORM\JoinTable(name="group_user",
-     *      joinColumns={@ORM\JoinColumn(name="group_id", referencedColumnName="id_value")},
-     *      inverseJoinColumns={@ORM\JoinColumn(name="user_id", referencedColumnName="id_value")}
-     * )
+     * @ORM\ManyToMany(targetEntity=User::class, mappedBy="groups", cascade={"persist"})
      */
     private $users;
 
