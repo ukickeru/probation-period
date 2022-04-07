@@ -9,20 +9,21 @@ use Mygento\AccessControlBundle\Core\Domain\Entity\User;
 
 /**
  * @ORM\Entity(repositoryClass=ACERepository::class)
+ * @ORM\Table(name="access_control_ace")
  */
 class ACE
 {
     /**
      * @ORM\Id()
      * @ORM\ManyToOne(targetEntity=User::class)
-     * @ORM\JoinColumn(name="user_id", referencedColumnName="id_value", onDelete="CASCADE")
+     * @ORM\JoinColumn(name="user_id", referencedColumnName="id", onDelete="CASCADE")
      */
     private ?User $user;
 
     /**
      * @ORM\Id()
      * @ORM\ManyToOne(targetEntity=Resource::class)
-     * @ORM\JoinColumn(name="resource_id", referencedColumnName="id_value", onDelete="CASCADE")
+     * @ORM\JoinColumn(name="resource_id", referencedColumnName="id", onDelete="CASCADE")
      */
     private ?Resource $resource;
 

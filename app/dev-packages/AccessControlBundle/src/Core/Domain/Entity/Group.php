@@ -11,35 +11,34 @@ use Mygento\AccessControlBundle\Core\Repository\GroupRepository;
 
 /**
  * @ORM\Entity(repositoryClass=GroupRepository::class)
- * @ORM\Table(name="`group`")
+ * @ORM\Table(name="access_control_group")
  */
 class Group
 {
     /**
-     * @ORM\Id()
-     * @ORM\Embedded(class=Id::class)
+     * @ORM\Embedded(class=Id::class, columnPrefix=false)
      */
     private ?Id $id;
 
     /**
-     * @ORM\Embedded(class=Name::class, columnPrefix="")
+     * @ORM\Embedded(class=Name::class)
      */
     protected Name $name;
 
     /**
      * @ORM\ManyToMany(targetEntity=User::class, inversedBy="groups", cascade={"persist"})
-     * @ORM\JoinTable(name="group_user",
-     *      joinColumns={@ORM\JoinColumn(name="group_id", referencedColumnName="id_value")},
-     *      inverseJoinColumns={@ORM\JoinColumn(name="user_id", referencedColumnName="id_value")}
+     * @ORM\JoinTable(name="access_control_group_user",
+     *      joinColumns={@ORM\JoinColumn(name="group_id", referencedColumnName="id")},
+     *      inverseJoinColumns={@ORM\JoinColumn(name="user_id", referencedColumnName="id")}
      * )
      */
     private $users;
 
     /**
      * @ORM\ManyToMany(targetEntity=Resource::class, inversedBy="groups", cascade={"persist"})
-     * @ORM\JoinTable(name="group_resource",
-     *      joinColumns={@ORM\JoinColumn(name="group_id", referencedColumnName="id_value")},
-     *      inverseJoinColumns={@ORM\JoinColumn(name="resource_id", referencedColumnName="id_value")}
+     * @ORM\JoinTable(name="access_control_group_resource",
+     *      joinColumns={@ORM\JoinColumn(name="group_id", referencedColumnName="id")},
+     *      inverseJoinColumns={@ORM\JoinColumn(name="resource_id", referencedColumnName="id")}
      * )
      */
     private $resources;

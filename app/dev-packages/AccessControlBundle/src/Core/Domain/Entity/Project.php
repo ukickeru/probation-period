@@ -11,12 +11,12 @@ use Mygento\AccessControlBundle\Core\Repository\ProjectRepository;
 
 /**
  * @ORM\Entity(repositoryClass=ProjectRepository::class)
+ * @ORM\Table(name="access_control_project")
  */
 class Project
 {
     /**
-     * @ORM\Id()
-     * @ORM\Embedded(class=Id::class)
+     * @ORM\Embedded(class=Id::class, columnPrefix=false)
      */
     private ?Id $id;
 
@@ -27,7 +27,7 @@ class Project
 
     /**
      * @ORM\OneToOne(targetEntity=Group::class, cascade={"persist"})
-     * @ORM\JoinColumn(name="group_id", referencedColumnName="id_value", nullable=false, onDelete="CASCADE")
+     * @ORM\JoinColumn(name="group_id", referencedColumnName="id", nullable=false, onDelete="CASCADE")
      */
     private Group $group;
 

@@ -10,12 +10,12 @@ use Mygento\AccessControlBundle\Core\Repository\ResourceRepository;
 
 /**
  * @ORM\Entity(repositoryClass=ResourceRepository::class)
+ * @ORM\Table(name="access_control_resource")
  */
 class Resource
 {
     /**
-     * @ORM\Id()
-     * @ORM\Embedded(class=Id::class)
+     * @ORM\Embedded(class=Id::class, columnPrefix=false)
      */
     private ?id $id;
 
@@ -26,13 +26,13 @@ class Resource
 
     /**
      * @ORM\ManyToOne(targetEntity=Organization::class, inversedBy="resources")
-     * @ORM\JoinColumn(name="organization_id", referencedColumnName="id_value", nullable=true, onDelete="SET NULL")
+     * @ORM\JoinColumn(name="organization_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
      */
     private ?Organization $organization;
 
     /**
      * @ORM\ManyToOne(targetEntity=Project::class, inversedBy="resources")
-     * @ORM\JoinColumn(name="project_id", referencedColumnName="id_value", nullable=true, onDelete="SET NULL")
+     * @ORM\JoinColumn(name="project_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
      */
     private ?Project $project;
 

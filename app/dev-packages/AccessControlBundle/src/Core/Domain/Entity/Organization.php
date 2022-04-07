@@ -11,12 +11,12 @@ use Mygento\AccessControlBundle\Core\Repository\OrganizationRepository;
 
 /**
  * @ORM\Entity(repositoryClass=OrganizationRepository::class)
+ * @ORM\Table(name="access_control_organization")
  */
 class Organization
 {
     /**
-     * @ORM\Id()
-     * @ORM\Embedded(class=Id::class)
+     * @ORM\Embedded(class=Id::class, columnPrefix=false)
      */
     protected ?Id $id;
 
@@ -27,7 +27,7 @@ class Organization
 
     /**
      * @ORM\OneToOne(targetEntity=Group::class, cascade={"persist"})
-     * @ORM\JoinColumn(name="group_id", referencedColumnName="id_value", nullable=false, onDelete="CASCADE")
+     * @ORM\JoinColumn(name="group_id", referencedColumnName="id", nullable=false, onDelete="CASCADE")
      */
     protected Group $group;
 

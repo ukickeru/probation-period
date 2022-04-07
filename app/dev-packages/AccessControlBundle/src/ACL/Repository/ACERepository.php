@@ -62,7 +62,7 @@ class ACERepository extends ServiceEntityRepository implements AccessControlChec
     {
         $connection = $this->_em->getConnection();
 
-        $sql = 'SELECT ace.resource_id FROM ace WHERE ace.user_id = ? AND ace.resource_id = ?';
+        $sql = 'SELECT ace.resource_id FROM access_control_ace ace WHERE ace.user_id = ? AND ace.resource_id = ?';
 
         return 1 === $connection->prepare($sql)->executeQuery([$userId->value(), $resourceId->value()])->rowCount();
     }
@@ -71,7 +71,7 @@ class ACERepository extends ServiceEntityRepository implements AccessControlChec
     {
         $connection = $this->_em->getConnection();
 
-        $sql = 'SELECT ace.resource_id FROM ace WHERE ace.user_id = ?';
+        $sql = 'SELECT ace.resource_id FROM access_control_ace ace WHERE ace.user_id = ?';
 
         return $connection->prepare($sql)->executeQuery([$userId->value()])->fetchFirstColumn();
     }
@@ -85,12 +85,12 @@ class ACERepository extends ServiceEntityRepository implements AccessControlChec
 
         $connection->beginTransaction();
         try {
-            $sql = 'INSERT INTO ace (user_id, resource_id) VALUES '.$ACEsToInsert;
+            $sql = 'INSERT INTO access_control_ace (user_id, resource_id) VALUES '.$ACEsToInsert;
             $connection->prepare($sql)->executeQuery();
 
             $connection->beginTransaction();
             try {
-                $sql = 'DELETE FROM ace WHERE (user_id, resource_id) IN ('.$ACEsToRemove.')';
+                $sql = 'DELETE FROM access_control_ace WHERE (user_id, resource_id) IN ('.$ACEsToRemove.')';
                 $connection->prepare($sql)->executeQuery();
 
                 $connection->commit();
@@ -110,7 +110,7 @@ class ACERepository extends ServiceEntityRepository implements AccessControlChec
     {
         $connection = $this->_em->getConnection();
 
-        $sql = 'INSERT INTO ace (user_id, resource_id) VALUES '.$ACEs;
+        $sql = 'INSERT INTO access_control_ace (user_id, resource_id) VALUES '.$ACEs;
 
         $connection->prepare($sql)->executeQuery();
     }
@@ -119,7 +119,7 @@ class ACERepository extends ServiceEntityRepository implements AccessControlChec
     {
         $connection = $this->_em->getConnection();
 
-        $sql = 'DELETE FROM ace WHERE (ace.user_id, ace.resource_id) IN ('.$ACEs.')';
+        $sql = 'DELETE FROM access_control_ace ace WHERE (ace.user_id, ace.resource_id) IN ('.$ACEs.')';
 
         $connection->prepare($sql)->executeQuery();
     }
@@ -135,12 +135,12 @@ class ACERepository extends ServiceEntityRepository implements AccessControlChec
 
         $connection->beginTransaction();
         try {
-            $sql = 'DELETE FROM ace';
+            $sql = 'DELETE FROM access_control_ace';
             $connection->prepare($sql)->executeQuery();
 
             $connection->beginTransaction();
             try {
-                $sql = 'INSERT INTO ace VALUES '.$ACEs;
+                $sql = 'INSERT INTO access_control_ace VALUES '.$ACEs;
                 $connection->prepare($sql)->executeQuery();
 
                 $connection->commit();

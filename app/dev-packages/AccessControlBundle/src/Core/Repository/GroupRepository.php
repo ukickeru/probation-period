@@ -33,12 +33,12 @@ class GroupRepository extends ServiceEntityRepository
     {
         $connection = $this->_em->getConnection();
 
-        $sql = 'SELECT DISTINCT u.id_value
-                FROM "group" g
-                JOIN group_user gu on g.id_value = gu.group_id
-                JOIN "user" u on u.id_value = gu.user_id
-                WHERE g.id_value = ?
-                ORDER BY u.id_value';
+        $sql = 'SELECT DISTINCT u.id
+                FROM access_control_group g
+                JOIN access_control_group_user gu on g.id = gu.group_id
+                JOIN access_control_user u on u.id = gu.user_id
+                WHERE g.id = ?
+                ORDER BY u.id';
 
         return $connection
             ->prepare($sql)
@@ -53,12 +53,12 @@ class GroupRepository extends ServiceEntityRepository
     {
         $connection = $this->_em->getConnection();
 
-        $sql = 'SELECT DISTINCT r.id_value
-                FROM "group" g
-                JOIN group_resource gr on g.id_value = gr.group_id
-                JOIN resource r on r.id_value = gr.resource_id
-                WHERE g.id_value = ?
-                ORDER BY r.id_value';
+        $sql = 'SELECT DISTINCT r.id
+                FROM access_control_group g
+                JOIN access_control_group_resource gr on g.id = gr.group_id
+                JOIN access_control_resource r on r.id = gr.resource_id
+                WHERE g.id = ?
+                ORDER BY r.id';
 
         return $connection
             ->prepare($sql)

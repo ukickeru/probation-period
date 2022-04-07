@@ -11,18 +11,17 @@ use Mygento\AccessControlBundle\Core\Repository\UserRepository;
 
 /**
  * @ORM\Entity(repositoryClass=UserRepository::class)
- * @ORM\Table(name="`user`")
+ * @ORM\Table(name="access_control_user")
  */
 class User
 {
     /**
-     * @ORM\Id()
-     * @ORM\Embedded(class=Id::class)
+     * @ORM\Embedded(class=Id::class, columnPrefix=false)
      */
     private ?Id $id;
 
     /**
-     * @ORM\Embedded(class=Name::class, columnPrefix="")
+     * @ORM\Embedded(class=Name::class)
      */
     protected Name $name;
 

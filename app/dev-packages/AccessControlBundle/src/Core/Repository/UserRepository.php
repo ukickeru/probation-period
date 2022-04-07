@@ -30,9 +30,9 @@ class UserRepository extends ServiceEntityRepository implements AccessControlChe
     public function getAllUsersId(): array
     {
         $connection = $this->_em->getConnection();
-        $sql = 'SELECT DISTINCT u.id_value
-                FROM "user" u
-                ORDER BY u.id_value';
+        $sql = 'SELECT DISTINCT u.id
+                FROM access_control_user u
+                ORDER BY u.id';
 
         return $connection
             ->prepare($sql)
@@ -47,14 +47,14 @@ class UserRepository extends ServiceEntityRepository implements AccessControlChe
     {
         try {
             $connection = $this->_em->getConnection();
-            $sql = 'SELECT DISTINCT r.id_value
-                FROM resource r
-                JOIN group_resource gr on r.id_value = gr.resource_id
-                JOIN "group" g on g.id_value = gr.group_id
-                JOIN group_user gu on g.id_value = gu.group_id
-                JOIN "user" u on u.id_value = gu.user_id
-                WHERE u.id_value = ? AND r.id_value = ?
-                ORDER BY r.id_value';
+            $sql = 'SELECT DISTINCT r.id
+                FROM access_control_resource r
+                JOIN access_control_group_resource gr on r.id = gr.resource_id
+                JOIN access_control_group g on g.id = gr.group_id
+                JOIN access_control_group_user gu on g.id = gu.group_id
+                JOIN access_control_user u on u.id = gu.user_id
+                WHERE u.id = ? AND r.id = ?
+                ORDER BY r.id';
 
             $ace = $connection
                 ->prepare($sql)
@@ -77,14 +77,14 @@ class UserRepository extends ServiceEntityRepository implements AccessControlChe
     public function getResourcesIdAvailableForUser(Id $userId): array
     {
         $connection = $this->_em->getConnection();
-        $sql = 'SELECT DISTINCT r.id_value
-                FROM resource r
-                JOIN group_resource gr on r.id_value = gr.resource_id
-                JOIN "group" g on g.id_value = gr.group_id
-                JOIN group_user gu on g.id_value = gu.group_id
-                JOIN "user" u on u.id_value = gu.user_id
-                WHERE u.id_value = ?
-                ORDER BY r.id_value';
+        $sql = 'SELECT DISTINCT r.id
+                FROM access_control_resource r
+                JOIN access_control_group_resource gr on r.id = gr.resource_id
+                JOIN access_control_group g on g.id = gr.group_id
+                JOIN access_control_group_user gu on g.id = gu.group_id
+                JOIN access_control_user u on u.id = gu.user_id
+                WHERE u.id = ?
+                ORDER BY r.id';
 
         return $connection
             ->prepare($sql)
@@ -95,13 +95,13 @@ class UserRepository extends ServiceEntityRepository implements AccessControlChe
     public function getACL()
     {
         $connection = $this->_em->getConnection();
-        $sql = 'SELECT DISTINCT u.id_value, r.id_value
-                FROM resource r
-                JOIN group_resource gr on r.id_value = gr.resource_id
-                JOIN "group" g on g.id_value = gr.group_id
-                JOIN group_user gu on g.id_value = gu.group_id
-                JOIN "user" u on u.id_value = gu.user_id
-                ORDER BY u.id_value, r.id_value';
+        $sql = 'SELECT DISTINCT u.id, r.id
+                FROM access_control_resource r
+                JOIN access_control_group_resource gr on r.id = gr.resource_id
+                JOIN access_control_group g on g.id = gr.group_id
+                JOIN access_control_group_user gu on g.id = gu.group_id
+                JOIN access_control_user u on u.id = gu.user_id
+                ORDER BY u.id, r.id';
 
         return $connection
             ->prepare($sql)
