@@ -31,11 +31,6 @@ class Organization
      */
     protected Group $group;
 
-    /**
-     * @ORM\OneToMany(targetEntity=Resource::class, mappedBy="organization", cascade={"persist"})
-     */
-    protected $resources;
-
     public function __construct(
         Name $name,
         Group $group,
@@ -44,7 +39,6 @@ class Organization
         $this->name = $name;
         $this->group = $group;
 
-        $this->resources = new ArrayCollection();
         foreach ($resources as $resource) {
             $this->addResource($resource);
         }
@@ -77,25 +71,19 @@ class Organization
      */
     public function getResources()
     {
-        return $this->resources;
+        return $this->group->getResources();
     }
 
     public function addResource(Resource $resource): self
     {
-        if (!$this->resources->contains($resource)) {
-            $this->resources->add($resource);
-            $resource->setOrganization($this);
-        }
+        $this->group->addResource($resource);
 
         return $this;
     }
 
     public function removeResource(Resource $resource): self
     {
-        if ($this->resources->contains($resource)) {
-            $this->resources->removeElement($resource);
-            $resource->setOrganization(null);
-        }
+        $this->group->removeResource($resource);
 
         return $this;
     }

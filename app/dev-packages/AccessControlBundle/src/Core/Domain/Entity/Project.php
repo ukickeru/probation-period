@@ -31,11 +31,6 @@ class Project
      */
     private Group $group;
 
-    /**
-     * @ORM\OneToMany(targetEntity=Resource::class, mappedBy="project", cascade={"persist"})
-     */
-    private $resources;
-
     public function __construct(
         Name $name,
         Group $group,
@@ -44,9 +39,8 @@ class Project
         $this->name = $name;
         $this->group = $group;
 
-        $this->resources = new ArrayCollection();
         foreach ($resources as $resource) {
-            $this->addResource($resource);
+            $this->group->addResource($resource);
         }
     }
 
@@ -77,25 +71,19 @@ class Project
      */
     public function getResources()
     {
-        return $this->resources;
+        return $this->group->getResources();
     }
 
     public function addResource(Resource $resource): self
     {
-        if (!$this->resources->contains($resource)) {
-            $this->resources->add($resource);
-            $resource->setProject($this);
-        }
+        $this->group->addResource($resource);
 
         return $this;
     }
 
     public function removeResource(Resource $resource): self
     {
-        if ($this->resources->contains($resource)) {
-            $this->resources->removeElement($resource);
-            $resource->setProject(null);
-        }
+        $this->group->removeResource($resource);
 
         return $this;
     }
