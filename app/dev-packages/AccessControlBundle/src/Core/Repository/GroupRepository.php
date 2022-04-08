@@ -4,6 +4,7 @@ namespace Mygento\AccessControlBundle\Core\Repository;
 
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use Mygento\AccessControlBundle\ACL\Domain\Service\ACLSynchronizer;
 use Mygento\AccessControlBundle\Core\Domain\Entity\Group;
 use Mygento\AccessControlBundle\Core\Domain\ValueObject\Id;
 
@@ -21,9 +22,12 @@ class GroupRepository extends ServiceEntityRepository
 {
     use DoctrineRepositoryTrait;
 
-    public function __construct(ManagerRegistry $registry)
-    {
+    public function __construct(
+        ManagerRegistry $registry,
+        ACLSynchronizer $ACLSynchronizer
+    ) {
         parent::__construct($registry, Group::class);
+        $this->ACLSynchronizer = $ACLSynchronizer;
     }
 
     /**

@@ -6,5 +6,5 @@ use Mygento\AccessControlBundle\Core\Domain\ValueObject\Id;
 
 interface AccessControlCheckerInterface
 {
-    public function isResourceAvailableForUser(Id $userId, Id $resourceId);
+    public function isResourceAvailableForUser(Id $userId, Id $resourceId): bool;
 }

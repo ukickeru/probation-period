@@ -16,9 +16,11 @@ use Mygento\AccessControlBundle\Core\Repository\GroupRepository;
 class Group
 {
     /**
-     * @ORM\Embedded(class=Id::class, columnPrefix=false)
+     * @ORM\Id()
+     * @ORM\GeneratedValue()
+     * @ORM\Column(type="integer")
      */
-    private ?Id $id;
+    private ?int $id;
 
     /**
      * @ORM\Embedded(class=Name::class)
@@ -26,11 +28,7 @@ class Group
     protected Name $name;
 
     /**
-     * @ORM\ManyToMany(targetEntity=User::class, inversedBy="groups", cascade={"persist"})
-     * @ORM\JoinTable(name="access_control_group_user",
-     *      joinColumns={@ORM\JoinColumn(name="group_id", referencedColumnName="id")},
-     *      inverseJoinColumns={@ORM\JoinColumn(name="user_id", referencedColumnName="id")}
-     * )
+     * @ORM\ManyToMany(targetEntity=User::class, mappedBy="groups", cascade={"persist"})
      */
     private $users;
 
@@ -63,7 +61,7 @@ class Group
 
     public function getId(): ?Id
     {
-        return $this->id;
+        return null === $this->id ? null : new Id($this->id);
     }
 
     public function getName(): Name

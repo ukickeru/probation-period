@@ -16,9 +16,11 @@ use Mygento\AccessControlBundle\Core\Repository\ProjectRepository;
 class Project
 {
     /**
-     * @ORM\Embedded(class=Id::class, columnPrefix=false)
+     * @ORM\Id()
+     * @ORM\GeneratedValue()
+     * @ORM\Column(type="integer")
      */
-    private ?Id $id;
+    private ?int $id;
 
     /**
      * @ORM\Embedded(class=Name::class)
@@ -31,6 +33,11 @@ class Project
      */
     private Group $group;
 
+    /**
+     * @ORM\OneToMany(targetEntity=Resource::class, mappedBy="project", cascade={"persist"})
+     */
+    protected $resources;
+
     public function __construct(
         Name $name,
         Group $group,
@@ -39,14 +46,15 @@ class Project
         $this->name = $name;
         $this->group = $group;
 
+        $this->resources = new ArrayCollection();
         foreach ($resources as $resource) {
-            $this->group->addResource($resource);
+            $this->addResource($resource);
         }
     }
 
     public function getId(): ?Id
     {
-        return $this->id;
+        return null === $this->id ? null : new Id($this->id);
     }
 
     public function getName(): Name
@@ -69,6 +77,34 @@ class Project
     /**
      * @return Collection
      */
+    public function getUsers()
+    {
+        return $this->group->getUsers();
+    }
+
+    public function addUser(User $user): self
+    {
+        if (!$this->getUsers()->contains($user)) {
+            $this->group->addUser($user);
+            $user->addGroup($this->group);
+        }
+
+        return $this;
+    }
+
+    public function removeUser(User $user): self
+    {
+        if ($this->getUsers()->contains($user)) {
+            $this->group->removeUser($user);
+            $user->removeGroup($this->group);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection
+     */
     public function getResources()
     {
         return $this->group->getResources();
@@ -76,14 +112,22 @@ class Project
 
     public function addResource(Resource $resource): self
     {
-        $this->group->addResource($resource);
+        if (!$this->resources->contains($resource)) {
+            $this->resources->add($resource);
+            $resource->setProject($this);
+            $this->group->addResource($resource);
+        }
 
         return $this;
     }
 
     public function removeResource(Resource $resource): self
     {
-        $this->group->removeResource($resource);
+        if ($this->resources->contains($resource)) {
+            $this->resources->removeElement($resource);
+            $resource->setProject(null);
+            $this->group->removeResource($resource);
+        }
 
         return $this;
     }

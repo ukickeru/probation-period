@@ -4,14 +4,14 @@ namespace Mygento\AccessControlBundle\ACL\Repository;
 
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\DBAL\TransactionIsolationLevel;
+use Doctrine\ORM\AbstractQuery;
 use Doctrine\Persistence\ManagerRegistry;
 use Mygento\AccessControlBundle\ACL\Domain\Entity\ACE;
 use Mygento\AccessControlBundle\ACL\Domain\Service\ACEsCollection;
+use Mygento\AccessControlBundle\Core\Domain\Entity\User;
 use Mygento\AccessControlBundle\Core\Domain\Service\AccessControlCheckerInterface;
 use Mygento\AccessControlBundle\Core\Domain\ValueObject\Id;
 use Mygento\AccessControlBundle\Core\Repository\DoctrineRepositoryTrait;
-use Mygento\AccessControlBundle\Core\Repository\GroupRepository;
-use Mygento\AccessControlBundle\Core\Repository\UserRepository;
 
 /**
  * @method ACE|null find($id, $lockMode = null, $lockVersion = null)
@@ -26,19 +26,9 @@ class ACERepository extends ServiceEntityRepository implements AccessControlChec
 {
     use DoctrineRepositoryTrait;
 
-    private UserRepository $userRepository;
-
-    private GroupRepository $groupRepository;
-
-    public function __construct(
-        ManagerRegistry $registry,
-        UserRepository $userRepository,
-        GroupRepository $groupRepository
-    ) {
+    public function __construct(ManagerRegistry $registry)
+    {
         parent::__construct($registry, ACE::class);
-
-        $this->userRepository = $userRepository;
-        $this->groupRepository = $groupRepository;
     }
 
     /**
@@ -60,93 +50,43 @@ class ACERepository extends ServiceEntityRepository implements AccessControlChec
 
     public function isResourceAvailableForUser(Id $userId, Id $resourceId): bool
     {
-        $connection = $this->_em->getConnection();
+        $qb = $this->_em->createQueryBuilder();
 
-        $sql = 'SELECT ace.resource_id FROM access_control_ace ace WHERE ace.user_id = ? AND ace.resource_id = ?';
-
-        return 1 === $connection->prepare($sql)->executeQuery([$userId->value(), $resourceId->value()])->rowCount();
-    }
-
-    public function getResourcesIdAvailableForUser(Id $userId): array
-    {
-        $connection = $this->_em->getConnection();
-
-        $sql = 'SELECT ace.resource_id FROM access_control_ace ace WHERE ace.user_id = ?';
-
-        return $connection->prepare($sql)->executeQuery([$userId->value()])->fetchFirstColumn();
-    }
-
-    public function updateACEs(
-        ACEsCollection $ACEsToInsert,
-        ACEsCollection $ACEsToRemove
-    ): void {
-        $connection = $this->_em->getConnection();
-        $connection->setTransactionIsolation(TransactionIsolationLevel::SERIALIZABLE);
-
-        $connection->beginTransaction();
-        try {
-            $sql = 'INSERT INTO access_control_ace (user_id, resource_id) VALUES '.$ACEsToInsert;
-            $connection->prepare($sql)->executeQuery();
-
-            $connection->beginTransaction();
-            try {
-                $sql = 'DELETE FROM access_control_ace WHERE (user_id, resource_id) IN ('.$ACEsToRemove.')';
-                $connection->prepare($sql)->executeQuery();
-
-                $connection->commit();
-            } catch (\Throwable $exception) {
-                $connection->rollBack();
-                throw new \Exception('Can not remove access control entries.', $exception->getCode(), $exception);
-            }
-
-            $connection->commit();
-        } catch (\Throwable $exception) {
-            $connection->rollBack();
-            throw new \Exception('Can not insert access control entries.', $exception->getPrevious()->getCode(), $exception);
-        }
-    }
-
-    public function insertACEs(ACEsCollection $ACEs)
-    {
-        $connection = $this->_em->getConnection();
-
-        $sql = 'INSERT INTO access_control_ace (user_id, resource_id) VALUES '.$ACEs;
-
-        $connection->prepare($sql)->executeQuery();
-    }
-
-    public function removeACEs(ACEsCollection $ACEs)
-    {
-        $connection = $this->_em->getConnection();
-
-        $sql = 'DELETE FROM access_control_ace ace WHERE (ace.user_id, ace.resource_id) IN ('.$ACEs.')';
-
-        $connection->prepare($sql)->executeQuery();
+        return null !== $qb->select('ace')
+            ->from(ACE::class, 'ace')
+            ->where('ace.user = :userId')
+            ->andWhere('ace.resource = :resourceId')
+            ->setParameters([
+                'userId' => $userId->value(),
+                'resourceId' => $resourceId->value(),
+            ])
+            ->getQuery()
+            ->getOneOrNullResult(AbstractQuery::HYDRATE_SCALAR);
     }
 
     public function updateACLGlobally(ACEsCollection $ACEs): void
     {
-        if (0 === count($ACEs)) {
-            return;
-        }
+        $acl_table_name = $this->_em->getClassMetadata(ACE::class)->getTableName();
 
         $connection = $this->_em->getConnection();
         $connection->setTransactionIsolation(TransactionIsolationLevel::SERIALIZABLE);
 
         $connection->beginTransaction();
         try {
-            $sql = 'DELETE FROM access_control_ace';
+            $sql = 'DELETE FROM '.$acl_table_name;
             $connection->prepare($sql)->executeQuery();
 
-            $connection->beginTransaction();
-            try {
-                $sql = 'INSERT INTO access_control_ace VALUES '.$ACEs;
-                $connection->prepare($sql)->executeQuery();
+            if (count($ACEs) > 0) {
+                $connection->beginTransaction();
+                try {
+                    $sql = 'INSERT INTO '.$acl_table_name.' VALUES '.$ACEs;
+                    $connection->prepare($sql)->executeQuery();
 
-                $connection->commit();
-            } catch (\Throwable $exception) {
-                $connection->rollBack();
-                throw new \Exception('Can not insert access control entries.', $exception->getCode(), $exception);
+                    $connection->commit();
+                } catch (\Throwable $exception) {
+                    $connection->rollBack();
+                    throw new \Exception('Can not insert access control entries.', $exception->getCode(), $exception);
+                }
             }
 
             $connection->commit();
@@ -154,5 +94,25 @@ class ACERepository extends ServiceEntityRepository implements AccessControlChec
             $connection->rollBack();
             throw new \Exception('Can not clear access control entries table.', $exception->getPrevious()->getCode(), $exception);
         }
+    }
+
+    public function getACL(): ACEsCollection
+    {
+        $qb = $this->_em->createQueryBuilder();
+        $ACEs = $qb->select('u.id as user_id, r.id as resource_id')
+            ->distinct()
+            ->from(User::class, 'u')
+            ->join('u.groups', 'g')
+            ->join('g.resources', 'r')
+            ->orderBy('u.id, r.id')
+            ->getQuery()
+            ->getArrayResult();
+
+        $ACEsCollection = new ACEsCollection();
+        foreach ($ACEs as $ACE) {
+            $ACEsCollection->addACE([$ACE['user_id'], $ACE['resource_id']]);
+        }
+
+        return $ACEsCollection;
     }
 }

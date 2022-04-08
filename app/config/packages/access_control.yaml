@@ -1,1 +1,2 @@
 access_control:
+    app_user_entity_table_name: "`user`"

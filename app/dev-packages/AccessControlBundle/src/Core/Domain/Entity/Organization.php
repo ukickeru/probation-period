@@ -16,9 +16,11 @@ use Mygento\AccessControlBundle\Core\Repository\OrganizationRepository;
 class Organization
 {
     /**
-     * @ORM\Embedded(class=Id::class, columnPrefix=false)
+     * @ORM\Id()
+     * @ORM\GeneratedValue()
+     * @ORM\Column(type="integer")
      */
-    protected ?Id $id;
+    private ?int $id;
 
     /**
      * @ORM\Embedded(class=Name::class)
@@ -31,6 +33,11 @@ class Organization
      */
     protected Group $group;
 
+    /**
+     * @ORM\OneToMany(targetEntity=Resource::class, mappedBy="organization", cascade={"persist"})
+     */
+    protected $resources;
+
     public function __construct(
         Name $name,
         Group $group,
@@ -39,6 +46,7 @@ class Organization
         $this->name = $name;
         $this->group = $group;
 
+        $this->resources = new ArrayCollection();
         foreach ($resources as $resource) {
             $this->addResource($resource);
         }
@@ -46,7 +54,7 @@ class Organization
 
     public function getId(): ?Id
     {
-        return $this->id;
+        return null === $this->id ? null : new Id($this->id);
     }
 
     public function getName(): Name
@@ -61,9 +69,32 @@ class Organization
         return $this;
     }
 
-    public function getGroup(): Group
+    /**
+     * @return Collection
+     */
+    public function getUsers()
     {
-        return $this->group;
+        return $this->group->getUsers();
+    }
+
+    public function addUser(User $user): self
+    {
+        if (!$this->getUsers()->contains($user)) {
+            $this->group->addUser($user);
+            $user->addGroup($this->group);
+        }
+
+        return $this;
+    }
+
+    public function removeUser(User $user): self
+    {
+        if ($this->getUsers()->contains($user)) {
+            $this->group->removeUser($user);
+            $user->removeGroup($this->group);
+        }
+
+        return $this;
     }
 
     /**
@@ -76,14 +107,22 @@ class Organization
 
     public function addResource(Resource $resource): self
     {
-        $this->group->addResource($resource);
+        if (!$this->resources->contains($resource)) {
+            $this->resources->add($resource);
+            $resource->setOrganization($this);
+            $this->group->addResource($resource);
+        }
 
         return $this;
     }
 
     public function removeResource(Resource $resource): self
     {
-        $this->group->removeResource($resource);
+        if ($this->resources->contains($resource)) {
+            $this->resources->removeElement($resource);
+            $resource->setOrganization(null);
+            $this->group->removeResource($resource);
+        }
 
         return $this;
     }

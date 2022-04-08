@@ -3,7 +3,10 @@
 namespace Mygento\AccessControlBundle\Core\Repository;
 
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\AbstractQuery;
 use Doctrine\Persistence\ManagerRegistry;
+use Mygento\AccessControlBundle\ACL\Domain\Service\ACLSynchronizer;
+use Mygento\AccessControlBundle\Core\Domain\Entity\Resource;
 use Mygento\AccessControlBundle\Core\Domain\Entity\User;
 use Mygento\AccessControlBundle\Core\Domain\Service\AccessControlCheckerInterface;
 use Mygento\AccessControlBundle\Core\Domain\ValueObject\Id;
@@ -22,22 +25,13 @@ class UserRepository extends ServiceEntityRepository implements AccessControlChe
 {
     use DoctrineRepositoryTrait;
 
-    public function __construct(ManagerRegistry $registry)
-    {
-        parent::__construct($registry, User::class);
-    }
-
-    public function getAllUsersId(): array
-    {
-        $connection = $this->_em->getConnection();
-        $sql = 'SELECT DISTINCT u.id
-                FROM access_control_user u
-                ORDER BY u.id';
-
-        return $connection
-            ->prepare($sql)
-            ->executeQuery()
-            ->fetchFirstColumn();
+    public function __construct(
+        ManagerRegistry $registry,
+        ACLSynchronizer $ACLSynchronizer,
+        string $entityClass = User::class
+    ) {
+        parent::__construct($registry, $entityClass);
+        $this->ACLSynchronizer = $ACLSynchronizer;
     }
 
     /**
@@ -46,29 +40,23 @@ class UserRepository extends ServiceEntityRepository implements AccessControlChe
     public function isResourceAvailableForUser(Id $userId, Id $resourceId): bool
     {
         try {
-            $connection = $this->_em->getConnection();
-            $sql = 'SELECT DISTINCT r.id
-                FROM access_control_resource r
-                JOIN access_control_group_resource gr on r.id = gr.resource_id
-                JOIN access_control_group g on g.id = gr.group_id
-                JOIN access_control_group_user gu on g.id = gu.group_id
-                JOIN access_control_user u on u.id = gu.user_id
-                WHERE u.id = ? AND r.id = ?
-                ORDER BY r.id';
+            $qb = $this->_em->createQueryBuilder();
 
-            $ace = $connection
-                ->prepare($sql)
-                ->executeQuery([$userId->value(), $resourceId->value()])
-                ->fetchFirstColumn();
+            return null !== $qb->select('r.id')
+                    ->from(Resource::class, 'r')
+                    ->join('r.groups', 'g')
+                    ->join('g.users', 'u')
+                    ->where('u.id = :userId')
+                    ->andWhere('r.id = :resourceId')
+                    ->setParameters([
+                        'userId' => $userId->value(),
+                        'resourceId' => $resourceId->value(),
+                    ])
+                    ->getQuery()
+                    ->getOneOrNullResult(AbstractQuery::HYDRATE_SCALAR);
         } catch (\Throwable $throwable) {
             return false;
         }
-
-        if (empty($ace)) {
-            return false;
-        }
-
-        return true;
     }
 
     /**
@@ -76,36 +64,15 @@ class UserRepository extends ServiceEntityRepository implements AccessControlChe
      */
     public function getResourcesIdAvailableForUser(Id $userId): array
     {
-        $connection = $this->_em->getConnection();
-        $sql = 'SELECT DISTINCT r.id
-                FROM access_control_resource r
-                JOIN access_control_group_resource gr on r.id = gr.resource_id
-                JOIN access_control_group g on g.id = gr.group_id
-                JOIN access_control_group_user gu on g.id = gu.group_id
-                JOIN access_control_user u on u.id = gu.user_id
-                WHERE u.id = ?
-                ORDER BY r.id';
+        $qb = $this->_em->createQueryBuilder();
 
-        return $connection
-            ->prepare($sql)
-            ->executeQuery([$userId->value()])
-            ->fetchFirstColumn();
-    }
-
-    public function getACL()
-    {
-        $connection = $this->_em->getConnection();
-        $sql = 'SELECT DISTINCT u.id, r.id
-                FROM access_control_resource r
-                JOIN access_control_group_resource gr on r.id = gr.resource_id
-                JOIN access_control_group g on g.id = gr.group_id
-                JOIN access_control_group_user gu on g.id = gu.group_id
-                JOIN access_control_user u on u.id = gu.user_id
-                ORDER BY u.id, r.id';
-
-        return $connection
-            ->prepare($sql)
-            ->executeQuery()
-            ->fetchAllNumeric();
+        return $qb->select('r.id')
+                ->from(Resource::class, 'r')
+                ->join('r.groups', 'g')
+                ->join('g.users', 'u')
+                ->where('u.id = :userId')
+                ->setParameter('userId', $userId->value())
+                ->getQuery()
+                ->getSingleColumnResult();
     }
 }

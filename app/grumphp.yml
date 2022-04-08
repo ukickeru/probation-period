@@ -7,12 +7,15 @@ grumphp:
     tasks:
         git_blacklist:
             keywords:
-                - "die("
-                - "var_dump("
-                - "print_f("
                 - "dump("
-                # - "dd("
+                - "dd("
+                - "die("
+                - "die;"
+                - "exit("
                 - "exit;"
+                - "echo("
+                - "print_f("
+                - "var_dump("
             triggered_by: ["php"]
         composer:
             no_check_lock: true

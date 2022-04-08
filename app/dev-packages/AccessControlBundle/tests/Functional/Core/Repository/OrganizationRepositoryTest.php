@@ -46,7 +46,6 @@ class OrganizationRepositoryTest extends BaseRepositoryTestCase
 
         // Check that organization was successfully persisted
         $this->assertEquals($name, $organization->getName());
-        $this->assertEquals($group->getName(), $organization->getGroup()->getName());
         $this->assertCount(1, $organization->getResources());
 
         // Save entities id and clear entity manager

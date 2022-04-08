@@ -17,13 +17,13 @@ services:
             - '../src/ACL/Entity/'
 
 
-    mygento.access_control.manager:
-        class: 'Mygento\AccessControlBundle\Core\Domain\Service\AccessControlManager'
+    mygento.access_control.facade:
+        class: 'Mygento\AccessControlBundle\Core\Domain\Service\AccessControlFacade'
         public: true
         lazy: true
 
-    Mygento\AccessControlBundle\Core\Domain\Service\AccessControlManager:
-        alias: 'mygento.access_control.manager'
+    Mygento\AccessControlBundle\Core\Domain\Service\AccessControlFacade:
+        alias: 'mygento.access_control.facade'
 
 
     mygento.access_control.security_voter:
@@ -44,9 +44,17 @@ services:
         alias: 'mygento.access_control.access_control_checker'
 
 
-    Mygento\AccessControlBundle\ACL\Domain\Service\ACESynchronizer:
-        alias: 'mygento.access_control.ace_synchronizer'
+    Mygento\AccessControlBundle\Core\Domain\Service\CustomAccessControlCheckerInterface:
+        public: true
 
-    mygento.access_control.ace_synchronizer:
-        class: 'Mygento\AccessControlBundle\ACL\Domain\Service\ACESynchronizer'
+
+    Mygento\AccessControlBundle\ACL\Domain\Service\ACLSynchronizer:
+        alias: 'mygento.access_control.acl_synchronizer'
+
+    mygento.access_control.acl_synchronizer:
+        class: 'Mygento\AccessControlBundle\ACL\Domain\Service\ACLSynchronizer'
+        public: true
+
+    mygento.access_control.doctrine_metadata_listener:
+        class: 'Mygento\AccessControlBundle\Core\Listener\DoctrineMetadataListener'
         public: true

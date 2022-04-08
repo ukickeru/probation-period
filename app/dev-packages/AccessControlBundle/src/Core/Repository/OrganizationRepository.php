@@ -4,6 +4,7 @@ namespace Mygento\AccessControlBundle\Core\Repository;
 
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use Mygento\AccessControlBundle\ACL\Domain\Service\ACLSynchronizer;
 use Mygento\AccessControlBundle\Core\Domain\Entity\Organization;
 
 /**
@@ -20,8 +21,11 @@ class OrganizationRepository extends ServiceEntityRepository
 {
     use DoctrineRepositoryTrait;
 
-    public function __construct(ManagerRegistry $registry)
-    {
+    public function __construct(
+        ManagerRegistry $registry,
+        ACLSynchronizer $ACLSynchronizer
+    ) {
         parent::__construct($registry, Organization::class);
+        $this->ACLSynchronizer = $ACLSynchronizer;
     }
 }

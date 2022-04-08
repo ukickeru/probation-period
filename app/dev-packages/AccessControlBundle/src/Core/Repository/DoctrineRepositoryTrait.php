@@ -3,13 +3,13 @@
 namespace Mygento\AccessControlBundle\Core\Repository;
 
 use Doctrine\ORM\ORMException;
+use Mygento\AccessControlBundle\ACL\Domain\Service\ACLSynchronizer;
 use Mygento\AccessControlBundle\Core\Domain\ValueObject\Id;
 
-/**
- * Trait DoctrineRepositoryTrait is intended to shorten code that uses built-in doctrine mechanisms.
- */
 trait DoctrineRepositoryTrait
 {
+    protected ?ACLSynchronizer $ACLSynchronizer = null;
+
     /**
      * @param Id $id Unified entity identifier
      *
@@ -17,7 +17,7 @@ trait DoctrineRepositoryTrait
      */
     public function findById(Id $id): object
     {
-        $user = $this->findOneBy(['id.value' => $id->value()]);
+        $user = $this->findOneBy(['id' => $id->value()]);
 
         if (null === $user) {
             throw new \DomainException($this->_entityName.' with ID "'.$id.'" was not found!');
@@ -39,6 +39,10 @@ trait DoctrineRepositoryTrait
 
         $this->_em->persist($object);
         $this->_em->flush();
+
+        if ($this->ACLSynchronizer instanceof ACLSynchronizer) {
+            $this->ACLSynchronizer->synchronize();
+        }
     }
 
     /**
@@ -54,6 +58,10 @@ trait DoctrineRepositoryTrait
 
         $this->_em->persist($object);
         $this->_em->flush();
+
+        if ($this->ACLSynchronizer instanceof ACLSynchronizer) {
+            $this->ACLSynchronizer->synchronize();
+        }
     }
 
     /**
@@ -74,5 +82,9 @@ trait DoctrineRepositoryTrait
 
         $this->_em->remove($entityOrId);
         $this->_em->flush();
+
+        if ($this->ACLSynchronizer instanceof ACLSynchronizer) {
+            $this->ACLSynchronizer->synchronize();
+        }
     }
 }

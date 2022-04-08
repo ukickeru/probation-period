@@ -15,9 +15,11 @@ use Mygento\AccessControlBundle\Core\Repository\ResourceRepository;
 class Resource
 {
     /**
-     * @ORM\Embedded(class=Id::class, columnPrefix=false)
+     * @ORM\Id()
+     * @ORM\GeneratedValue()
+     * @ORM\Column(type="integer")
      */
-    private ?id $id;
+    private ?int $id;
 
     /**
      * @ORM\ManyToMany(targetEntity=Group::class, mappedBy="resources")
@@ -52,7 +54,7 @@ class Resource
 
     public function getId(): ?Id
     {
-        return $this->id;
+        return null === $this->id ? null : new Id($this->id);
     }
 
     /**

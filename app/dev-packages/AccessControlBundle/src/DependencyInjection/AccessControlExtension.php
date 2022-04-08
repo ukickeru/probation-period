@@ -2,6 +2,7 @@
 
 namespace Mygento\AccessControlBundle\DependencyInjection;
 
+use Mygento\AccessControlBundle\Core\Listener\DoctrineMetadataListener;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Extension\Extension;
@@ -29,5 +30,13 @@ class AccessControlExtension extends Extension implements PrependExtensionInterf
      */
     public function load(array $configs, ContainerBuilder $container)
     {
+        $configuration = new Configuration();
+
+        $config = $this->processConfiguration($configuration, $configs);
+
+        $container->register('mygento.access_control.doctrine_metadata_listener', DoctrineMetadataListener::class);
+        $doctrineMetadataListenerDefinition = $container->getDefinition('mygento.access_control.doctrine_metadata_listener');
+        $doctrineMetadataListenerDefinition->setArgument('$appUserEntityTableName', $config['app_user_entity_table_name']);
+        $doctrineMetadataListenerDefinition->addTag('doctrine.event_listener', ['event' => 'loadClassMetadata']);
     }
 }

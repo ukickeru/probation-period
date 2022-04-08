@@ -2,18 +2,8 @@
 
 namespace Mygento\AccessControlBundle\Core\Domain\ValueObject;
 
-use Doctrine\ORM\Mapping as ORM;
-
-/**
- * @ORM\Embeddable()
- */
 class Id
 {
-    /**
-     * @ORM\Id()
-     * @ORM\GeneratedValue()
-     * @ORM\Column(name="id", type="integer")
-     */
     private int $value;
 
     public function __construct(int $value)

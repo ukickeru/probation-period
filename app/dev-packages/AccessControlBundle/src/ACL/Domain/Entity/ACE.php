@@ -18,14 +18,14 @@ class ACE
      * @ORM\ManyToOne(targetEntity=User::class)
      * @ORM\JoinColumn(name="user_id", referencedColumnName="id", onDelete="CASCADE")
      */
-    private ?User $user;
+    private User $user;
 
     /**
      * @ORM\Id()
      * @ORM\ManyToOne(targetEntity=Resource::class)
      * @ORM\JoinColumn(name="resource_id", referencedColumnName="id", onDelete="CASCADE")
      */
-    private ?Resource $resource;
+    private Resource $resource;
 
     public function __construct(
         User $user,
@@ -35,12 +35,12 @@ class ACE
         $this->resource = $resource;
     }
 
-    public function getUser(): ?User
+    public function getUser(): User
     {
         return $this->user;
     }
 
-    public function getResource(): ?Resource
+    public function getResource(): Resource
     {
         return $this->resource;
     }
