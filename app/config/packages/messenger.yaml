@@ -12,6 +12,10 @@ framework:
                 retry_strategy:
                     max_retries: 3
                     multiplier: 2
+
+            rabbitmq:
+                dsn: '%env(resolve:RABBITMQ_DSN)%'
+
             failed: 'doctrine://default?queue_name=failed'
             # sync: 'sync://'
 
@@ -22,3 +26,5 @@ framework:
 
             # Route your messages to the transports
             # 'App\Message\YourMessage': async
+
+            'App\Message\OrderConfirmationEmail': rabbitmq

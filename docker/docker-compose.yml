@@ -21,9 +21,6 @@ services:
             - "8091:8080"
         expose:
             - "22"
-        links:
-            - "database"
-            - "memcached"
         volumes:
             - ./../app/:/var/app/
 
@@ -45,6 +42,11 @@ services:
         container_name: probation-redis
         image: redis:6-alpine
 
+    rabbitmq:
+        container_name: probation-rabbitmq
+        image: rabbitmq:3.9-management-alpine
+        ports:
+            - "15672"
 
 volumes:
     jenkins:
