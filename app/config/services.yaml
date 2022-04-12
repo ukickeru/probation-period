@@ -26,5 +26,10 @@ services:
         resource: '../src/Controller/'
         tags: [ 'controller.service_arguments' ]
 
+    App\Controller\StockController:
+        bind:
+            $memcachedAdapter: '@app.memcached'
+            $redisAdapter: '@app.redis'
+
     Mygento\AccessControlBundle\Core\Domain\Service\CustomAccessControlCheckerInterface:
         class: 'App\Repository\UserRepository'

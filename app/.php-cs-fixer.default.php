@@ -1,5 +1,5 @@
 <?php
 
-$finder = PhpCsFixer\Finder::create()->in(['./src', './dev-packages']);
+$finder = PhpCsFixer\Finder::create()->in(['./src']);
 return (new PhpCsFixer\Config())
     ->setFinder($finder);

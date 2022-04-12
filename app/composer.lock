@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "b606d19a5387c15b7de7c3bd88c09f80",
+    "content-hash": "d999526996dd5509d385d6b858772d3e",
     "packages": [
         {
             "name": "doctrine/annotations",
@@ -1685,15 +1685,15 @@
             "dist": {
                 "type": "path",
                 "url": "dev-packages/AccessControlBundle",
-                "reference": "1f48db9d9df867c36ecef6ed98948450f974b39a"
+                "reference": "f642567af00fcd2e7afd06ed00582957496d5eac"
             },
             "require": {
-                "doctrine/doctrine-migrations-bundle": "^3.0",
                 "doctrine/orm": "^2.10",
                 "php": ">=7.4 || >=8.0",
                 "symfony/config": "^5.4 || ^6.0",
                 "symfony/dependency-injection": "^5.4 || ^6.0",
-                "symfony/http-kernel": "^5.4 || ^6.0"
+                "symfony/http-kernel": "^5.4 || ^6.0",
+                "symfony/security-bundle": "^5.4 || ^6.0"
             },
             "require-dev": {
                 "doctrine/doctrine-fixtures-bundle": "^3.4",

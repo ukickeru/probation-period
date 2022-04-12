@@ -23,6 +23,7 @@ services:
             - "22"
         links:
             - "database"
+            - "memcached"
         volumes:
             - ./../app/:/var/app/
 
@@ -36,11 +37,13 @@ services:
         volumes:
             - db-data:/var/lib/postgresql/data:rw
 
-#    memcached:
-#        container_name: probation-memcached
+    memcached:
+        container_name: probation-memcached
+        image: memcached:1.6-alpine
 
-#    redis:
-#        container_name: probation-redis
+    redis:
+        container_name: probation-redis
+        image: redis:6-alpine
 
 
 volumes:
