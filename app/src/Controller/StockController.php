@@ -39,11 +39,12 @@ class StockController extends AbstractController
 
         /** @var Stock $stock */
         $stock = $this->memcachedAdapter->get($symbol, function (ItemInterface $item) use ($symbol, $entityManager) {
-            echo 'Cache miss for ' . $symbol . ' in memcached!<br>';
+            echo 'Cache miss for '.$symbol.' in memcached!<br>';
+
             return $entityManager->getRepository(Stock::class)->findOneBy(['symbol' => $symbol]);
         });
 
-        if ($stock === null) {
+        if (null === $stock) {
             return new Response("Stock \"{$symbol}\" was not found.");
         }
 
@@ -61,11 +62,12 @@ class StockController extends AbstractController
 
         /** @var Stock $stock */
         $stock = $this->redisAdapter->get($symbol, function (ItemInterface $item) use ($symbol, $entityManager) {
-            echo 'Cache miss for ' . $symbol . ' in Redis!<br>';
+            echo 'Cache miss for '.$symbol.' in Redis!<br>';
+
             return $entityManager->getRepository(Stock::class)->findOneBy(['symbol' => $symbol]);
         });
 
-        if ($stock === null) {
+        if (null === $stock) {
             return new Response("Stock \"{$symbol}\" was not found.");
         }
 

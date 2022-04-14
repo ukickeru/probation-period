@@ -40,5 +40,20 @@ RUN chmod 644 ./bin
 
 RUN composer install
 
+# Install nvm, node and npm, and build frontend
+ENV NODE_VERSION 14.19.1
+WORKDIR /var/app/frontend
+
+RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash && \
+    export NVM_DIR="$HOME/.nvm" && \
+    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" && \
+    [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion" && \
+    nvm install $NODE_VERSION && \
+    npm install -g @angular/cli --unsafe-perm=true && \
+    npm install && \
+    npm run-script build
+
+WORKDIR /var/app
+
 # Run entrypoint script
 ENTRYPOINT ["/bin/bash", "/var/app/start.sh"]

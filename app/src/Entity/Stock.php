@@ -43,12 +43,12 @@ class Stock
         int $price,
         string $name
     ) {
-        if (strlen($symbol) === 0 || strlen($symbol) > 4) {
+        if (0 === strlen($symbol) || strlen($symbol) > 4) {
             throw new \DomainException('Stock symbol should be presented by non-empty string, no longer than 4 symbols!');
         }
         $this->symbol = strtoupper($symbol);
 
-        if (strlen($currency) === 0 || strlen($currency) > 3) {
+        if (0 === strlen($currency) || strlen($currency) > 3) {
             throw new \DomainException('Stock currency should be presented by non-empty string, no longer than 3 symbols!');
         }
         $this->currency = $currency;
@@ -58,7 +58,7 @@ class Stock
         }
         $this->price = $price;
 
-        if (strlen($name) === 0 || strlen($name) > 30) {
+        if (0 === strlen($name) || strlen($name) > 30) {
             throw new \DomainException('Stock name should be presented by non-empty string, no longer than 50 symbols!');
         }
         $this->name = $name;
@@ -95,7 +95,7 @@ class Stock
 
     public function getPrice(): ?float
     {
-        return ($this->price / 100);
+        return $this->price / 100;
     }
 
     public function setPrice(int $price): self

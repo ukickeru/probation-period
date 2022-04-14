@@ -22,12 +22,12 @@ class OrderController extends AbstractController
      */
     public function placeOrder(): Response
     {
-        $orderId = random_int(0,999);
+        $orderId = random_int(0, 999);
 
         $this->messageBus->dispatch(new OrderConfirmationEmail($orderId));
 
         return new Response(
-            'Your new order #' . $orderId . ' have been placed!'
+            'Your new order #'.$orderId.' have been placed!'
         );
     }
 }

@@ -34,9 +34,13 @@ security:
     # Easy way to control access for large sections of your site
     # Note: Only the *first* access control that matches will be used
     access_control:
-        - { path: ^/login, roles: PUBLIC_ACCESS }
+        - { path: ^/order, roles: ROLE_USER }
+        - { path: ^/resource, roles: ROLE_USER }
+        - { path: ^/stock, roles: ROLE_USER }
         - { path: ^/unprotected/, roles: PUBLIC_ACCESS }
-        - { path: ^/, roles: ROLE_USER }
+        - { path: ^/login, roles: PUBLIC_ACCESS }
+        - { path: ^/app, roles: PUBLIC_ACCESS }
+        - { path: ^/, roles: PUBLIC_ACCESS }
 
 when@test:
     security:

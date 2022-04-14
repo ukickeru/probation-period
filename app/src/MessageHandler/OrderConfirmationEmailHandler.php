@@ -9,6 +9,6 @@ class OrderConfirmationEmailHandler implements MessageHandlerInterface
 {
     public function __invoke(OrderConfirmationEmail $orderConfirmationEmail)
     {
-        echo 'Sending email for order #' . $orderConfirmationEmail->getOrderId() . PHP_EOL;
+        echo 'Sending email for order #'.$orderConfirmationEmail->getOrderId().PHP_EOL;
     }
 }
