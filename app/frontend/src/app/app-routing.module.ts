@@ -4,13 +4,19 @@ import { HomeComponent } from "./pages/home/home.component";
 import { LoginComponent } from "./pages/login/login.component";
 import { RegistrationComponent } from "./pages/registration/registration.component";
 import { ProfileComponent } from "./pages/profile/profile.component";
+import { AuthService } from "./services/auth/auth.service";
+
+export const HOME_PATH = '';
+export const LOGIN_PATH = 'login';
+export const REGISTRATION_PATH = 'registration';
+export const LOGOUT_PATH = 'logout';
 
 const routes: Routes = [
-  { path: 'home', component: HomeComponent },
-  { path: 'login', component: LoginComponent },
-  { path: 'registration', component: RegistrationComponent },
-  { path: 'profile', component: ProfileComponent },
-  { path: '', redirectTo: 'home', pathMatch: 'full' }
+  { path: LOGIN_PATH, component: LoginComponent },
+  { path: REGISTRATION_PATH, component: RegistrationComponent },
+  { path: LOGOUT_PATH, redirectTo: LOGIN_PATH },
+  { path: HOME_PATH, component: HomeComponent, canActivate: [AuthService] },
+  { path: 'profile', component: ProfileComponent, canActivate: [AuthService] },
 ];
 
 @NgModule({

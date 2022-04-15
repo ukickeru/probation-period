@@ -32,15 +32,14 @@ export class TokenStorageService
     return null
   }
 
-  public getUser(): UserPayload | any
-  {
+  public getUser(): UserPayload | null {
     const token = this.getToken()
 
     if (token) {
       return token.getUser()
     }
 
-    return {}
+    return null
   }
 }
 
@@ -80,7 +79,7 @@ export class UserPayload
   constructor(
     private name: string,
     private email: string,
-    private roles: {}
+    private roles: string[]
   ) {
   }
 
@@ -94,7 +93,7 @@ export class UserPayload
     return this.email
   }
 
-  public getRoles(): {}
+  public getRoles(): string[]
   {
     return this.roles
   }

@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { TokenStorageService } from "./services/auth/token-storage.service";
+import { environment } from '../environments/environment';
 
 @Component({
   selector: 'app-root',
@@ -8,18 +9,21 @@ import { TokenStorageService } from "./services/auth/token-storage.service";
 })
 export class AppComponent
 {
+  appName: string = 'App';
   isLoggedIn = false;
   username?: string;
 
-  constructor(private tokenStorageService: TokenStorageService) {
+  constructor(private tokenStorageService: TokenStorageService)
+  {
+    this.appName = environment.appName
   }
 
   ngOnInit(): void {
-    this.isLoggedIn = !!this.tokenStorageService.getToken();
+    this.isLoggedIn = this.tokenStorageService.getToken() != null;
 
     if (this.isLoggedIn) {
       const user = this.tokenStorageService.getUser();
-      this.username = user.getName();
+      this.username = user?.getName();
     }
   }
 

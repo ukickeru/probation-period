@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { AuthService } from "../../services/auth/auth.service";
 import { Token, TokenStorageService, UserPayload } from "../../services/auth/token-storage.service";
+import { Router } from "@angular/router";
+import { HOME_PATH } from "../../app-routing.module";
 
 @Component({
   selector: 'app-login',
@@ -12,19 +14,24 @@ export class LoginComponent implements OnInit
   form: any = {
     email: null,
     password: null
-  };
-  isLoggedIn = false;
-  isLoginFailed = false;
-  errorMessage = '';
-  roles: string[] = [];
+  }
+  isLoggedIn = false
+  isLoginFailed = false
+  errorMessage = ''
+  roles: string[] = []
 
-  constructor(private authService: AuthService, private tokenStorage: TokenStorageService) {
+  constructor(
+    private authService: AuthService,
+    private tokenStorage: TokenStorageService,
+    private router: Router
+  ) {
   }
 
   ngOnInit(): void {
     if (this.tokenStorage.getToken()) {
       this.isLoggedIn = true;
-      this.roles = this.tokenStorage.getUser().roles;
+      // @ts-ignore
+      this.roles = this.tokenStorage.getUser().getRoles();
     }
   }
 
@@ -44,21 +51,24 @@ export class LoginComponent implements OnInit
 
         this.tokenStorage.saveToken(
           new Token(user, token)
-        );
+        )
 
-        this.isLoginFailed = false;
-        this.isLoggedIn = true;
-        this.roles = this.tokenStorage.getUser().getRoles();
-        this.reloadPage();
+        this.isLoginFailed = false
+        this.isLoggedIn = true
+        // @ts-ignore
+        this.roles = this.tokenStorage.getUser().getRoles()
+        this.reloadPage()
       },
       err => {
-        this.errorMessage = err.error.message;
-        this.isLoginFailed = true;
+        this.errorMessage = err.error.message
+        this.isLoginFailed = true
       }
     );
   }
 
-  reloadPage(): void {
-    window.location.reload();
+  private reloadPage(): void
+  {
+    window.location.href = HOME_PATH
+    // this.router.navigateByUrl(HOME_PATH)
   }
 }

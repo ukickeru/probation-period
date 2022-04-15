@@ -1,6 +1,9 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { ActivatedRouteSnapshot, CanActivate, Router, RouterStateSnapshot } from "@angular/router";
+import { Token, TokenStorageService } from "./token-storage.service";
+import { AppRoutingModule, HOME_PATH, LOGIN_PATH, REGISTRATION_PATH } from "../../app-routing.module";
 
 const AUTH_API = 'https://localhost:8091/api';
 const httpOptions = {
@@ -10,9 +13,26 @@ const httpOptions = {
 @Injectable({
   providedIn: 'root'
 })
-export class AuthService
+export class AuthService implements CanActivate
 {
-  constructor(private http: HttpClient) {
+  constructor(
+    private http: HttpClient,
+    private tokenStorage: TokenStorageService,
+    private router: Router
+  ) {
+  }
+
+  canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot)
+  {
+    if (this.tokenStorage.getToken() === null) {
+      return this.router.parseUrl(LOGIN_PATH)
+    }
+
+    if (state.url === LOGIN_PATH || state.url === REGISTRATION_PATH) {
+      return this.router.parseUrl(HOME_PATH)
+    }
+
+    return true;
   }
 
   login(email: string, password: string): Observable<any> {
