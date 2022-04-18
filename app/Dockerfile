@@ -1,12 +1,18 @@
 FROM php:8.1.3-cli
 
+WORKDIR /var/app
+
+# Copy default PHP configuration
 RUN cp /usr/local/etc/php/php.ini-development /usr/local/etc/php/php.ini
 
 # Extensions for PHP
 RUN apt-get update && apt-get install -y zip libpq-dev libonig-dev libmemcached-dev zlib1g-dev libxml2-dev librabbitmq-dev \
-    && pecl install memcached-3.2.0 redis amqp \
+    && pecl install xdebug memcached-3.2.0 redis amqp \
     && docker-php-ext-install pgsql pdo_pgsql \
-    && docker-php-ext-enable memcached redis amqp
+    && docker-php-ext-enable xdebug memcached redis amqp
+
+# Copy XDebug configuration
+COPY ./docker-php-ext-debug.ini /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
 
 # Enable Java for in puprose of using this service as a Jenkins slave node
 RUN apt-get update \
@@ -20,6 +26,7 @@ RUN apt-get update \
     && sed -ri 's/.*PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config \
     && sed 's@session\s*required\s*pam_loginuid.so@session optional pam_loginuid.so@g' -i /etc/pam.d/sshd
 
+# Open SSH port
 EXPOSE 22
 
 # Install Symfony server
@@ -27,12 +34,11 @@ RUN echo 'deb [trusted=yes] https://repo.symfony.com/apt/ /' | tee /etc/apt/sour
     && apt-get update \
     && apt-get install -y symfony-cli
 
+# Install SSL sertificate
 RUN symfony server:ca:install
 
 # Install Composer, copy project and install project dependencies
 COPY --from=composer /usr/bin/composer /usr/local/bin/composer
-
-WORKDIR /var/app
 
 COPY ./ ./
 
@@ -42,6 +48,7 @@ RUN composer install
 
 # Install nvm, node and npm, and build frontend
 ENV NODE_VERSION 14.19.1
+
 WORKDIR /var/app/frontend
 
 RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash && \

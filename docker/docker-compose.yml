@@ -23,6 +23,8 @@ services:
             - "22"
         volumes:
             - ./../app/:/var/app/
+        extra_hosts:
+            - host.docker.internal:host-gateway
 
     database:
         container_name: probation-database
